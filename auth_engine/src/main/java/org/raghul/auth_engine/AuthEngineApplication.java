@@ -7,7 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class AuthEngineApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AuthEngineApplication.class, args);
-	}
 
+		SpringApplication.run(AuthEngineApplication.class, args);
+		System.out.println("Initial Setup done");
+	}
 }
