@@ -3,13 +3,23 @@ import jakarta.persistence.*;
 
 
 @Entity
-
-public class UserEnity {
+//@OneToMany
+public class UserEnity2 {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     int u_id;
     String name;
     String password;
     String email;
+    int org_id;
+
+    public int getOrg_id() {
+        return org_id;
+    }
+
+    public void setOrg_id(int org_id) {
+        this.org_id = org_id;
+    }
 
     public int getU_id() {
         return u_id;
@@ -27,7 +37,7 @@ public class UserEnity {
         this.name = name;
     }
 
-    private String getPassword() {
+    public String getPassword() {
         return password;
     }
 

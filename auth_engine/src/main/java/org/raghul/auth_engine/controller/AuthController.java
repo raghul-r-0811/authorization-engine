@@ -1,7 +1,7 @@
 package org.raghul.auth_engine.controller;
 
 
-import org.raghul.auth_engine.entity.UserEnity;
+import org.raghul.auth_engine.entity.UserEnity2;
 import org.raghul.auth_engine.repository.UserRepo;
 import org.raghul.auth_engine.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +25,11 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public UserEnity register(@RequestBody UserEnity newUser) {
+    public UserEnity2 register(@RequestBody UserEnity2 newUser) {
         //change userEntity to DTO and chnage them into entity in service
         System.out.println("registeing new User");
 
-        userService.registerUser(newUser);
+        //userService.registerUser(newUser);
         return newUser;
     }
 
