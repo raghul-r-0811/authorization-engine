@@ -1,4 +1,4 @@
-package org.raghul.auth_engine.Config;
+package org.raghul.auth_engine.config;
 
 
 import org.springframework.context.annotation.Bean;
@@ -12,5 +12,6 @@ public class AppConfig {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 
 }

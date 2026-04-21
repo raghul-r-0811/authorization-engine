@@ -7,7 +7,13 @@ import org.raghul.auth_engine.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/*
 
+=========================================================================================
+                    JUST A SAMPLE CONTROLLER TO CHECK WHETHER THINGS WORK
+==========================================================================================
+
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -24,14 +30,16 @@ public class AuthController {
     }
 
 
-    @PostMapping("/register")
-    public UserEnity2 register(@RequestBody UserEnity2 newUser) {
-        //change userEntity to DTO and chnage them into entity in service
-        System.out.println("registeing new User");
+//    @PostMapping("/register")
+//    public UserEnity2 register(@RequestBody UserEnity2 newUser) {
+//        //change userEntity to DTO and chnage them into entity in service
+//        System.out.println("registeing new User");
+//
+//        //userService.registerUser(newUser);
+//        return newUser;
+//    }
 
-        //userService.registerUser(newUser);
-        return newUser;
-    }
+
 
 
 }

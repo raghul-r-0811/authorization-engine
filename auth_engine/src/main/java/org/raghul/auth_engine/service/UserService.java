@@ -26,4 +26,9 @@ public class UserService {
         userRepo.save(user); // you were missing this!
         return true;
     }
+    //fuction for userLogin for any organization
+    public boolean login(RegisterUserRequest loginUser){
+        // for given pw and email cross check whether
+        return false;
+    }
 }
