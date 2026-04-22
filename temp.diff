@@ -1,0 +1,228 @@
+diff --git a/auth_engine/build.gradle b/auth_engine/build.gradle
+index 9d52636..8be0d7f 100644
+--- a/auth_engine/build.gradle
++++ b/auth_engine/build.gradle
+@@ -31,6 +31,10 @@ dependencies {
+ 	implementation("org.postgresql:postgresql:42.7.7")
+ 	implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.50'
+ 
++	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
++	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
++	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
++
+ }
+ 
+ tasks.named('test') {
+diff --git a/auth_engine/src/main/java/org/raghul/auth_engine/config/AppConfig.java b/auth_engine/src/main/java/org/raghul/auth_engine/config/AppConfig.java
+index f02baa9..faeb6aa 100644
+--- a/auth_engine/src/main/java/org/raghul/auth_engine/config/AppConfig.java
++++ b/auth_engine/src/main/java/org/raghul/auth_engine/config/AppConfig.java
+@@ -1,4 +1,4 @@
+-package org.raghul.auth_engine.Config;
++package org.raghul.auth_engine.config;
+ 
+ 
+ import org.springframework.context.annotation.Bean;
+@@ -13,4 +13,5 @@ public class AppConfig {
+         return new BCryptPasswordEncoder();
+     }
+ 
++
+ }
+diff --git a/auth_engine/src/main/java/org/raghul/auth_engine/config/SecurityConfig.java b/auth_engine/src/main/java/org/raghul/auth_engine/config/SecurityConfig.java
+index 1993f09..05c0bf7 100644
+--- a/auth_engine/src/main/java/org/raghul/auth_engine/config/SecurityConfig.java
++++ b/auth_engine/src/main/java/org/raghul/auth_engine/config/SecurityConfig.java
+@@ -1,23 +1,58 @@
+-package org.raghul.auth_engine.Config;
++package org.raghul.auth_engine.config;
+ 
++import org.raghul.auth_engine.security.CustomUserDetailService;
++import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.context.annotation.Bean;
+ import org.springframework.context.annotation.Configuration;
++import org.springframework.security.authentication.AuthenticationManager;
++import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
++import org.springframework.security.config.Customizer;
++import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+ import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
++import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+ import org.springframework.security.web.SecurityFilterChain;
+ 
+ @Configuration
+ @EnableWebSecurity
+ public class SecurityConfig {
+ 
++    private final CustomUserDetailService customUserDetailService;
++
++    private final BCryptPasswordEncoder passwordEncoder;
++
++   @Autowired
++    public SecurityConfig(CustomUserDetailService customUserDetailService,BCryptPasswordEncoder bCryptPasswordEncoder){
++        System.out.println("Secutity config construtor is called ");
++        //if(customUserDetailService == null) System.out.println("customeUDS = "+customUserDetailService);
++        //if(bCryptPasswordEncoder == null) System.out.println("bcryp.. ="+bCryptPasswordEncoder);
++        this.customUserDetailService = customUserDetailService;
++        this.passwordEncoder = bCryptPasswordEncoder;
++    }
++
+     @Bean
+     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
++        //System.out.println("");
+         http
+                 .csrf(csrf -> csrf.disable())
+                 .authorizeHttpRequests(auth -> auth
+                         .requestMatchers("/app/home/register").permitAll()
+                         .anyRequest().authenticated()
+-                );
++                ).httpBasic(Customizer.withDefaults());
+         return http.build();
+     }
++
++    @Bean
++    public DaoAuthenticationProvider authenticationProvider() {
++        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
++        authProvider.setUserDetailsService(customUserDetailService);
++        authProvider.setPasswordEncoder(passwordEncoder);
++        return authProvider;
++    }
++
++    @Bean
++    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
++        return config.getAuthenticationManager();
++    }
++
+ }
+diff --git a/auth_engine/src/main/java/org/raghul/auth_engine/controller/AuthController.java b/auth_engine/src/main/java/org/raghul/auth_engine/controller/AuthController.java
+index 7f133f6..bf1a9a8 100644
+--- a/auth_engine/src/main/java/org/raghul/auth_engine/controller/AuthController.java
++++ b/auth_engine/src/main/java/org/raghul/auth_engine/controller/AuthController.java
+@@ -7,7 +7,13 @@ import org.raghul.auth_engine.service.UserService;
+ import org.springframework.http.ResponseEntity;
+ import org.springframework.web.bind.annotation.*;
+ 
++/*
+ 
++=========================================================================================
++                    JUST A SAMPLE CONTROLLER TO CHECK WHETHER THINGS WORK
++==========================================================================================
++
++ */
+ @RestController
+ @RequestMapping("/api/auth")
+ public class AuthController {
+@@ -24,14 +30,16 @@ public class AuthController {
+     }
+ 
+ 
+-    @PostMapping("/register")
+-    public UserEnity2 register(@RequestBody UserEnity2 newUser) {
+-        //change userEntity to DTO and chnage them into entity in service
+-        System.out.println("registeing new User");
++//    @PostMapping("/register")
++//    public UserEnity2 register(@RequestBody UserEnity2 newUser) {
++//        //change userEntity to DTO and chnage them into entity in service
++//        System.out.println("registeing new User");
++//
++//        //userService.registerUser(newUser);
++//        return newUser;
++//    }
++
+ 
+-        //userService.registerUser(newUser);
+-        return newUser;
+-    }
+ 
+ 
+ }
+diff --git a/auth_engine/src/main/java/org/raghul/auth_engine/controller/Home_Controller.java b/auth_engine/src/main/java/org/raghul/auth_engine/controller/Home_Controller.java
+index 27c5e7a..4efa933 100644
+--- a/auth_engine/src/main/java/org/raghul/auth_engine/controller/Home_Controller.java
++++ b/auth_engine/src/main/java/org/raghul/auth_engine/controller/Home_Controller.java
+@@ -5,6 +5,15 @@ import org.raghul.auth_engine.service.UserService;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.web.bind.annotation.*;
+ 
++/*
++
++=============================================================================
++        HOME CONTROLLER : WHERE USER REGISTRATION OR LOGIN HAPPENS
++=============================================================================
++
++ */
++
++
+ @RestController
+ @RequestMapping("app/home")
+ public class Home_Controller {
+@@ -16,4 +25,8 @@ public class Home_Controller {
+         return "registeration done";
+     }
+ 
++    public String login(@RequestBody RegisterUserRequest userLogin){
++        userService.login(userLogin);
++        return "valid user - Login successful";
++    }
+ }
+diff --git a/auth_engine/src/main/java/org/raghul/auth_engine/dto/RegisterUserRequest.java b/auth_engine/src/main/java/org/raghul/auth_engine/dto/RegisterUserRequest.java
+index ab3acd9..928427f 100644
+--- a/auth_engine/src/main/java/org/raghul/auth_engine/dto/RegisterUserRequest.java
++++ b/auth_engine/src/main/java/org/raghul/auth_engine/dto/RegisterUserRequest.java
+@@ -4,6 +4,6 @@ package org.raghul.auth_engine.dto;
+ // DTO used for user Registration
+ 
+ 
+-
+ public record RegisterUserRequest(String u_name, String u_email, String password) {
++
+ }
+diff --git a/auth_engine/src/main/java/org/raghul/auth_engine/repository/UserRepo.java b/auth_engine/src/main/java/org/raghul/auth_engine/repository/UserRepo.java
+index 70043f0..46a684b 100644
+--- a/auth_engine/src/main/java/org/raghul/auth_engine/repository/UserRepo.java
++++ b/auth_engine/src/main/java/org/raghul/auth_engine/repository/UserRepo.java
+@@ -5,7 +5,10 @@ import org.raghul.auth_engine.entity.UserEnity2;
+ import org.springframework.data.jpa.repository.JpaRepository;
+ import org.springframework.stereotype.Repository;
+ 
++import java.util.Optional;
++
+ @Repository
+ public interface UserRepo extends JpaRepository<UserEnity2,Integer> {
+ 
++    UserEnity2 findByEmail(String username);
+ }
+diff --git a/auth_engine/src/main/java/org/raghul/auth_engine/service/UserService.java b/auth_engine/src/main/java/org/raghul/auth_engine/service/UserService.java
+index 76c3a93..950362c 100644
+--- a/auth_engine/src/main/java/org/raghul/auth_engine/service/UserService.java
++++ b/auth_engine/src/main/java/org/raghul/auth_engine/service/UserService.java
+@@ -26,4 +26,9 @@ public class UserService {
+         userRepo.save(user); // you were missing this!
+         return true;
+     }
++    //fuction for userLogin for any organization
++    public boolean login(RegisterUserRequest loginUser){
++        // for given pw and email cross check whether
++        return false;
++    }
+ }
+diff --git a/auth_engine/src/main/resources/application.properties b/auth_engine/src/main/resources/application.properties
+index 60c1efc..bfef6af 100644
+--- a/auth_engine/src/main/resources/application.properties
++++ b/auth_engine/src/main/resources/application.properties
+@@ -12,7 +12,15 @@ server.max-http-request-header-size=16KB
+ spring.datasource.url=${NEON_URL}
+ spring.datasource.username=${NEON_USER}
+ spring.datasource.password=${NEON_PASS}
++
+ spring.jpa.hibernate.ddl-auto=update
+ 
++logging.level.org.springframework.security=DEBUG
++logging.level.org.springframework.security.web.FilterChainProxy=DEBUG
++logging.level.org.springframework.security.web.authentication=DEBUG
++logging.level.org.springframework.security.authentication.ProviderManager=DEBUG
++logging.level.org.raghul.auth_engine=DEBUG
++trace=false
++
+ 
+ 
