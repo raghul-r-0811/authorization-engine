@@ -36,9 +36,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/app/home/register").permitAll()
-                        .anyRequest().authenticated()
-                ).httpBasic(Customizer.withDefaults());
+                        .requestMatchers("/app/home/register","/app/home/login").permitAll()
+                        .anyRequest().authenticated());
+                //).httpBasic(Customizer.withDefaults());
         return http.build();
     }
 
@@ -52,6 +52,8 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+       System.out.println("SecurityConfig.authernticationManager");
+
         return config.getAuthenticationManager();
     }
 
