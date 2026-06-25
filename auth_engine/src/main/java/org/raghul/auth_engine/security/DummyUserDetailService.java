@@ -8,19 +8,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-/*
-This is the class that asks the repo layer to check for whether there is a user or not
-with this email. If yes it will create a UserDetails  object which will reperesent the user entity
-for Spring Security.(UserDetail is used by Spring Security for ---- xxx --- fill it once understood completely)
- */
+@Service("dummyUserDetailsService")
+public class DummyUserDetailService implements UserDetailsService {
 
+    protected UserRepo userRepo;
 
-
-@Service("customUserDetailsService")
-public class CustomUserDetailService implements UserDetailsService {
     @Autowired
-    UserRepo userRepo;
-
+    public DummyUserDetailService(UserRepo userRepo){
+        this.userRepo = userRepo;
+    }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         System.out.println("=====================loadUserByName in CustomerUserDetailService ==============================");
