@@ -1,6 +1,6 @@
 package org.raghul.auth_engine.security;
 
-import org.raghul.auth_engine.entity.UserEnity2;
+import org.raghul.auth_engine.entity.UserEnity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -8,8 +8,8 @@ import java.util.Collection;
 import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
-    private UserEnity2 user;
-    public CustomUserDetails(UserEnity2 user){
+    private UserEnity user;
+    public CustomUserDetails(UserEnity user){
         this.user = user;
     }
     @Override

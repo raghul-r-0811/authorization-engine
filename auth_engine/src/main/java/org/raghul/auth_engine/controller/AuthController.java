@@ -1,8 +1,6 @@
 package org.raghul.auth_engine.controller;
 
 
-import org.raghul.auth_engine.entity.UserEnity2;
-import org.raghul.auth_engine.repository.UserRepo;
 import org.raghul.auth_engine.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,5 +1,6 @@
 package org.raghul.auth_engine.controller;
 
+import jakarta.validation.Valid;
 import org.raghul.auth_engine.dto.LoginRequest;
 import org.raghul.auth_engine.dto.LoginResponse;
 import org.raghul.auth_engine.dto.RegisterUserRequest;
@@ -39,29 +40,29 @@ public class Home_Controller {
         return ResponseEntity.ok("Controller WORKS!");
     }
 
-    @PostMapping("/register")
-    public String register(@RequestBody RegisterUserRequest newUser){
+    /*@PostMapping("/register")
+    public String register(@RequestBody @Valid RegisterUserRequest newUser){
         userService.registerUser(newUser);
         return "registeration done";
 
 
 //---------------------------------------------------------------------
-        /*  Sample Entry for Postman
+        *//*  Sample Entry for Postman
         {
           "u_name": "Raghul Ramar 201",
           "u_email": "Raghul201@gmail.com",
           "password": "secret123456"
         }
 
-         */
+         *//*
 //---------------------------------------------------------------------
 
+    }*/
 
 
 
-    }
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest userLogin){
+    public LoginResponse login(@RequestBody @Valid LoginRequest userLogin){
         // if lots of unwanted(hacker attacks) login request hits the server it will degrade/break the server performance. Find ways to prevent it
         //userService.login(userLogin);   ---> this is not needed because this part is handled by spring security
         System.out.println("------------------------------------Authenticating------------------------------------");
@@ -75,6 +76,7 @@ public class Home_Controller {
     }
     @GetMapping("/verifyToken")
     public String checkToken(){
+      //  if(jwtService.isTokenValid());
         return "verificationDone";
     }
 }
