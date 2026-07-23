@@ -7,6 +7,7 @@ import org.raghul.auth_engine.entity.TenantEntity;
 import org.raghul.auth_engine.repository.RolesRepo;
 import org.raghul.auth_engine.repository.TenantRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 
@@ -21,6 +22,7 @@ public class SuperAdminService {
         this.rolesRepo = rolesRepo;
     }
 
+   // @PreAuthorize("hasRole('SUPER_ADMIN')")
     public TenantEntity addNewTenant(RegisterTenantRequest newTenant){
         TenantEntity currTenant = new TenantEntity();
         currTenant.setTenantName(newTenant.tenantName());

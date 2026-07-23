@@ -3,38 +3,38 @@ import jakarta.persistence.*;
 
 
 @Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"org_id", "email"})
+@Table(
+        name = "users_entity",
+        uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"tenantId", "email"})
 })
 
-public class UserEnity {
+public class UserEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer u_id;
+    Integer uId;
+
     String name;
     String password;
+
     @Column(nullable = false)
     String email;
-    Integer role;
 
-    @Column(nullable = false)
-    Integer org_id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "roleId", nullable = false)
+    RolesEntity role;
 
-    public Integer getOrg_id() {
-        return org_id;
+   // @Column(nullable = false)
+    Integer tenantId;
+
+    public Integer getuId() {
+        return uId;
     }
 
-    public void setOrg_id(int org_id) {
-        this.org_id = org_id;
+    public void setuId(Integer uId) {
+        this.uId = uId;
     }
-
-    public Integer getU_id() {
-        return u_id;
-    }
-
-    /*public void setU_id(int u_id) {
-        this.u_id = u_id;
-    }*/
 
     public String getName() {
         return name;
@@ -58,6 +58,22 @@ public class UserEnity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public RolesEntity getRole() {
+        return role;
+    }
+
+    public void setRole(RolesEntity role) {
+        this.role = role;
+    }
+
+    public Integer getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(Integer tenantId) {
+        this.tenantId = tenantId;
     }
 
     /*public void setRole(String role) {  this.role = role; }*/

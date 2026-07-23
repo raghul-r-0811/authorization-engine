@@ -1,5 +1,6 @@
 package org.raghul.auth_engine.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -23,9 +24,12 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
-    public String generateToken(LoginRequest userLogin) {
+    public String generateToken(CustomUserDetails customUserDetails) {
         return Jwts.builder()
-                .subject(userLogin.email())
+                .subject(customUserDetails.getEmail())
+                .claim("role", customUserDetails.getRoleName())
+                .claim("tenantId", customUserDetails.getTenantId())
+                .claim("userId", customUserDetails.getUserId())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSignInKey())
@@ -37,7 +41,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String extractUsername(String token) {
+    public String extractUserEmail(String token) {
         return Jwts.parser()
                 .verifyWith(getSignInKey())
                 .build()
@@ -45,9 +49,22 @@ public class JwtService {
                 .getPayload()
                 .getSubject();
     }
+    public Claims extractUserDetailsFromToken(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public String extractRole(String token) {
+        return extractUserDetailsFromToken(token).get("role", String.class);
+    }
 
     public boolean isTokenValid(String token) {
+
         try {
+            System.out.println("isTokenValid is called");
             Jwts.parser()
                     .verifyWith(getSignInKey())
                     .build()

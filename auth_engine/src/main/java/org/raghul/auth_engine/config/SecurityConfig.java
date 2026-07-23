@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final UserDetailsService customUserDetailService;
@@ -42,7 +44,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/app/home/register","/app/home/login","/app/home/test","/app/admin/addTenant","/app/admin/addRoles").permitAll()
+                        .requestMatchers("/app/home/register","/app/home/login","/app/admin/addTenant","/app/admin/addRoles").permitAll()
                         .anyRequest().authenticated()).sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -71,21 +73,19 @@ public class SecurityConfig {
             protected Authentication createSuccessAuthentication(Object principal, Authentication authentication,
                                                                  UserDetails user) {
                 System.out.println("-------------createSuccessAuthentication() is called in DaoAuthenticationManager");
-                debugStack();
+                //debugStack();
                 return super.createSuccessAuthentication(principal,authentication,user);
             }
         };
-
-
         authProvider.setUserDetailsService(customUserDetailService);
         authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;
     }
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-       System.out.println("SecurityConfig.authernticationManager");
+      // System.out.println("SecurityConfig.authernticationManager");
         AuthenticationManager authenticationManager = config.getAuthenticationManager();
-        System.out.println("================"+ authenticationManager.getClass());
+        //System.out.println("================"+ authenticationManager.getClass());
         return authenticationManager;
     }
 

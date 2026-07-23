@@ -1,6 +1,6 @@
 package org.raghul.auth_engine.security;
 
-import org.raghul.auth_engine.entity.UserEnity;
+import org.raghul.auth_engine.entity.UserEntity;
 import org.raghul.auth_engine.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +20,7 @@ public class DummyUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         System.out.println("=====================loadUserByName in CustomerUserDetailService ==============================");
-        UserEnity user = userRepo.findByEmail(username);
+        UserEntity user = userRepo.findByEmail(username);
         if(user == null ){
             throw new UsernameNotFoundException("Email id not found");
         }

@@ -5,11 +5,13 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"tenantId", "roleName"})
+})
 public class RolesEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int roleId;
-    @Column(unique = true)
     String roleName;
     Integer tenantId;
     @NotNull
