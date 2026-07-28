@@ -4,8 +4,10 @@ package org.raghul.auth_engine.controller;
 import org.raghul.auth_engine.dto.ApiResponse;
 import org.raghul.auth_engine.dto.RegisterRoleRequest;
 import org.raghul.auth_engine.dto.RegisterTenantRequest;
+import org.raghul.auth_engine.dto.RegisterUserRequest;
 import org.raghul.auth_engine.entity.RolesEntity;
 import org.raghul.auth_engine.entity.TenantEntity;
+import org.raghul.auth_engine.entity.UserEntity;
 import org.raghul.auth_engine.service.SuperAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +25,14 @@ public class SuperAdminController {
     SuperAdminService superAdminService;
 
     //add a new Tenant in the tenant table.
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+   // @PreAuthorize("hasRole('SUPER_ADMIN')")
+
+    @PostMapping("/registerSuperAdminUser")
+    public String addSuperAdminUser(@RequestBody RegisterUserRequest newUser){
+        superAdminService.addSuperAdmin(newUser);
+        return "New Admin added";
+    }
+
     @PostMapping("/addTenant")
     public ResponseEntity<ApiResponse> addTenant(@RequestBody RegisterTenantRequest newTenant){
         TenantEntity savedTenant =  superAdminService.addNewTenant(newTenant);

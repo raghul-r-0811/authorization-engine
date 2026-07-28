@@ -4,12 +4,14 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.raghul.auth_engine.dto.LoginRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 
 
 @Service
@@ -24,16 +26,21 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
-    public String generateToken(CustomUserDetails customUserDetails) {
-        return Jwts.builder()
+    public String generateToken(Authentication authentication, CustomUserDetails customUserDetails) {
+        var builder = Jwts.builder()
                 .subject(customUserDetails.getEmail())
-                .claim("role", customUserDetails.getRoleName())
-                .claim("tenantId", customUserDetails.getTenantId())
+                .claim("authorities", authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList())
                 .claim("userId", customUserDetails.getUserId())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(getSignInKey())
-                .compact();
+                .signWith(getSignInKey());
+
+        if (customUserDetails.getTenantId() != null) {
+            builder.claim("tenantId", customUserDetails.getTenantId());
+        }
+        return builder.compact();
     }
 
     private SecretKey getSignInKey() {
@@ -57,10 +64,13 @@ public class JwtService {
                 .getPayload();
     }
 
-    public String extractRole(String token) {
-        return extractUserDetailsFromToken(token).get("role", String.class);
+    public List<String> extractRoles(String token) {
+        return extractUserDetailsFromToken(token).get("roles", List.class);
     }
 
+    public List<String> extractAuthorities(String token) {
+        return extractUserDetailsFromToken(token).get("authorities", List.class);
+    }
     public boolean isTokenValid(String token) {
 
         try {

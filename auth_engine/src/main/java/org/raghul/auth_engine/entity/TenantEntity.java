@@ -3,8 +3,9 @@ package org.raghul.auth_engine.entity;
 
 import jakarta.persistence.*;
 
-//only super admin can add tenants to this table
-
+/**
+ only super admin can add tenants to this table
+ **/
 @Entity
 public class TenantEntity {
     @Id

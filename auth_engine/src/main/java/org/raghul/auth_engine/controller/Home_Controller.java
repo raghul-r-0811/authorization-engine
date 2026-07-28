@@ -10,6 +10,7 @@ import org.raghul.auth_engine.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -67,28 +68,22 @@ public class Home_Controller {
 
 
 
-
-
-
-
-
     /**  ----------------------  Place where DaoAuthentication Manager Loaded with UserDetailServive(CustomUSerDetailService)
-     * which is loaded with Usertails(CustomeUserDetails) loads user from the db .{@link DaoAuthenticationProvider} .retrieveUser **/
+     * which is loaded with Usertails(CustomeUserDetails) loads user from the db .{@link DaoAuthenticationProvider}DaoAuthenticationProvider.retrieveUser **/
+
+    /** if lots of unwanted(hacker attacks) login request hits the server it will degrade/break the server performance. Find ways to prevent it**/
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody @Valid LoginRequest userLogin){
-        // if lots of unwanted(hacker attacks) login request hits the server it will degrade/break the server performance. Find ways to prevent it
-        //userService.login(userLogin);   ---> this is not needed because this part is handled by spring security
         System.out.println("------------------------------------Authenticating------------------------------------");
-        Authentication authentication =  authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userLogin.email(),userLogin.password()));
+        Authentication authentication =  authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userLogin.email(),userLogin.password())); /**{@link AbstractUserDetailsAuthenticationProvider#authenticate(Authentication)}**/
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        String jwtToken = jwtService.generateToken(customUserDetails);
-
-        //System.out.println("--------------------------------- Authentication done -----------------------------------------");
-        //return a JWT token so user can use that
+        String jwtToken = jwtService.generateToken(authentication,customUserDetails);
         return new LoginResponse(jwtToken);
     }
+
+
     @GetMapping("/verifyToken")
     public Map<String,Object> checkToken(@RequestHeader("Authorization")String authHeader){
         String token = authHeader.substring(7);

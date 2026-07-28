@@ -1,13 +1,15 @@
 package org.raghul.auth_engine.service;
 
 import org.raghul.auth_engine.dto.RegisterUserRequest;
-import org.raghul.auth_engine.entity.RolesEntity;
-import org.raghul.auth_engine.entity.UserEntity;
+import org.raghul.auth_engine.entity.*;
 import org.raghul.auth_engine.repository.RolesRepo;
+import org.raghul.auth_engine.repository.TenantRepo;
 import org.raghul.auth_engine.repository.UserRepo;
+import org.raghul.auth_engine.repository.UserRoleRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -18,19 +20,42 @@ public class UserService {
     @Autowired
     private RolesRepo rolesRepo;
     @Autowired
+    private TenantRepo tenantRepo;
+    @Autowired
+    private UserRoleRepo userRoleRepo;
+
+
+    @Autowired
     public UserService(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
 
+
+    @Transactional
     public boolean registerUser(RegisterUserRequest newUser){
-        UserEntity user = new UserEntity();
+
         RolesEntity currentRole = rolesRepo.findById(newUser.roleId()) .orElseThrow(() -> new RuntimeException("Invalid role id"));;
+        TenantEntity currentTenant = tenantRepo.findById(newUser.tenantId()).orElseThrow(()-> new RuntimeException("Invalid tenant id"));
+
+        if (userRepo.existsByTenantAndEmail(currentTenant, newUser.u_email())) {
+            throw new IllegalArgumentException("Email already exists in this tenant");
+        }
+
+        UserEntity user = new UserEntity();
         user.setEmail(newUser.u_email());
         user.setPassword(passwordEncoder.encode(newUser.password()));
         user.setName(newUser.u_name());
-        user.setRole(currentRole);
-        user.setTenantId(newUser.tenantId());
-        userRepo.save(user); // you were missing this!
+        user.setTenant(currentTenant);
+
+        validateUserRoleAssignment(user, currentRole, currentTenant);
+
+        UserEntity currentUser = userRepo.save(user);
+
+        UserRoleEntity currentUserRole = new UserRoleEntity();
+        currentUserRole.setRole(currentRole);
+        currentUserRole.setUser(currentUser);
+        currentUserRole.setTenant(currentTenant);
+        userRoleRepo.save(currentUserRole);
         return true;
     }
     //fuction for userLogin for any organization
@@ -38,4 +63,36 @@ public class UserService {
         // for given pw and email cross check whether
         return false;
     }
+
+    /**
+     * Whether this role with this scope is valid for user with tenant.
+     * **/
+    private void validateUserRoleAssignment(UserEntity user, RolesEntity role, TenantEntity assignmentTenant) {
+
+        if (role.getScopeType() == ScopeType.PLATFORM) {
+            if (assignmentTenant!=  null) {
+                throw new IllegalArgumentException("Platform role cannot have tenant");
+            }
+            if (user.getTenant() != null) {
+                throw new IllegalArgumentException("Platform user cannot have tenant");
+            }
+            return;
+        }
+
+        if (role.getScopeType() == ScopeType.TENANT) {
+            if (assignmentTenant == null) {
+                throw new IllegalArgumentException("Tenant role requires tenant");
+            }
+            if (user.getTenant() == null) {
+                throw new IllegalArgumentException("Tenant user must belong to a tenant");
+            }
+            if (!user.getTenant().getTenantId().equals(assignmentTenant.getTenantId())) {
+                throw new IllegalArgumentException("User tenant mismatch");
+            }
+            if (role.getTenant() == null || !role.getTenant().getTenantId().equals(assignmentTenant.getTenantId())) {
+                throw new IllegalArgumentException("Role tenant mismatch");
+            }
+        }
+    }
+
 }

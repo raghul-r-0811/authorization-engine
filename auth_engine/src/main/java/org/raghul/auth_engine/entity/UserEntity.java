@@ -1,6 +1,10 @@
 package org.raghul.auth_engine.entity;
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
+/** Main user entity  **/
 
 @Entity
 @Table(
@@ -21,15 +25,35 @@ public class UserEntity {
     @Column(nullable = false)
     String email;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "roleId", nullable = false)
-    RolesEntity role;
+    @ManyToOne
+    @JoinColumn(name = "tenant_id")
+    TenantEntity tenant;
 
-   // @Column(nullable = false)
-    Integer tenantId;
+    /** One user can have multiple roles.And each of those roles
+     * will have its own set of permissions for differnt resources **/
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserRoleEntity> userRoles = new HashSet<>();
+
+
 
     public Integer getuId() {
         return uId;
+    }
+
+    public TenantEntity getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(TenantEntity tenant) {
+        this.tenant = tenant;
+    }
+
+    public Set<UserRoleEntity> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(Set<UserRoleEntity> userRoles) {
+        this.userRoles = userRoles;
     }
 
     public void setuId(Integer uId) {
@@ -60,21 +84,21 @@ public class UserEntity {
         this.email = email;
     }
 
-    public RolesEntity getRole() {
+    /*public RolesEntity getRole() {
         return role;
     }
 
     public void setRole(RolesEntity role) {
         this.role = role;
-    }
+    }*/
 
-    public Integer getTenantId() {
+    /*public Integer getTenantId() {
         return tenantId;
     }
 
     public void setTenantId(Integer tenantId) {
         this.tenantId = tenantId;
-    }
+    }*/
 
     /*public void setRole(String role) {  this.role = role; }*/
 }

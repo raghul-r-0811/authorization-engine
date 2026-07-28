@@ -1,6 +1,6 @@
 package org.raghul.auth_engine.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-public record RegisterTenantRequest(@NotBlank String tenantName) {
+public record RegisterTenantRequest(@NotNull String tenantName) {
 }

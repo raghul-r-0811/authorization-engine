@@ -44,7 +44,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/app/home/register","/app/home/login","/app/admin/addTenant","/app/admin/addRoles").permitAll()
+                        .requestMatchers("/app/home/register","/app/home/login","/app/admin/addTenant","/app/admin/addRoles","/app/admin/registerSuperAdminUser").permitAll()
                         .anyRequest().authenticated()).sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -88,5 +88,7 @@ public class SecurityConfig {
         //System.out.println("================"+ authenticationManager.getClass());
         return authenticationManager;
     }
+
+
 
 }
