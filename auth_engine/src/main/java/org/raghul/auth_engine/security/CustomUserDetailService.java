@@ -1,6 +1,6 @@
 package org.raghul.auth_engine.security;
 
-import org.raghul.auth_engine.entity.UserEnity2;
+import org.raghul.auth_engine.entity.UserEntity;
 import org.raghul.auth_engine.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,14 +16,15 @@ for Spring Security.(UserDetail is used by Spring Security for ---- xxx --- fill
 
 
 
-@Service
+@Service("customUserDetailsService")
 public class CustomUserDetailService implements UserDetailsService {
     @Autowired
     UserRepo userRepo;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEnity2 user = userRepo.findByEmail(username);
+        System.out.println("=====================loadUserByName in CustomerUserDetailService ==============================");
+        UserEntity user = userRepo.findByEmail(username);
         if(user == null ){
             throw new UsernameNotFoundException("Email id not found");
         }

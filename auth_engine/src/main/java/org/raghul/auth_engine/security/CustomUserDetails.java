@@ -1,20 +1,44 @@
 package org.raghul.auth_engine.security;
 
-import org.raghul.auth_engine.entity.UserEnity2;
+import org.raghul.auth_engine.entity.RolesEntity;
+import org.raghul.auth_engine.entity.UserEntity;
+import org.raghul.auth_engine.entity.UserRoleEntity;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
-    private UserEnity2 user;
-    public CustomUserDetails(UserEnity2 user){
+    private UserEntity user;
+    public CustomUserDetails(UserEntity user){
         this.user = user;
     }
+
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public List<String> getRoleNames() {
+        System.out.println("----------temp buff--------------");
+       // return "temp buff";
+        return user.getUserRoles().stream()
+                .map(UserRoleEntity::getRole)
+                .map(RolesEntity::getRoleName)
+                .toList();
+    }
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return user.getUserRoles().stream()
+                .map(UserRoleEntity::getRole)
+                .filter(role -> role != null && role.getRoleName() != null)
+                .map(RolesEntity::getRoleName)
+                .distinct()
+                .map(roleName -> new SimpleGrantedAuthority("ROLE_" + roleName))
+                .toList();
     }
 
     @Override
@@ -53,11 +77,11 @@ public class CustomUserDetails implements UserDetails {
         return user.getEmail();
     }
 
-    public int getOrgId(){
-        return user.getOrg_id();
+    public Integer getTenantId(){
+        return user.getTenant() != null ? user.getTenant().getTenantId() : null;
     }
 
     public int getUserId(){
-        return user.getU_id();
+        return user.getuId();
     }
 }
