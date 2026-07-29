@@ -1,4 +1,4 @@
-package org.raghul.auth_engine.config;
+package org.raghul.auth_engine.exception;
 
 
 import org.springframework.http.HttpStatus;
@@ -18,6 +18,17 @@ public class OverAllExceptionHandler {
                         "status", 403,
                         "error", "FORBIDDEN",
                         "message", "You don't have the proper permission to do this action !!!!"
+                )
+        );
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                Map.of(
+                        "status", 404,
+                        "error", "NOT_FOUND",
+                        "message", ex.getMessage()
                 )
         );
     }

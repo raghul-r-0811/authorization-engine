@@ -15,7 +15,7 @@ import java.util.Set;
 public class RolesEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int roleId;
+    Integer roleId;
     @Column(nullable = false)
     String roleName;
 
@@ -33,21 +33,18 @@ public class RolesEntity {
     private ScopeType scopeType;
 
     String description;
-
     /**
      *
      * **/
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserRoleEntity> userRoles = new HashSet<>();
 
-    @ManyToMany
-            @JoinTable(name = "role_permission",joinColumns = @JoinColumn(name ="role_id"),
-            inverseJoinColumns = @JoinColumn(name ="permission_id"))
-    private Set<PermissionEntity> permissions = new HashSet<>();
+    @OneToMany(mappedBy = "role",cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<RolePermissionEntity> rolePermission = new HashSet<>();
 
 
 
-    public int getRoleId() {
+    public Integer getRoleId() {
         return roleId;
     }
 
@@ -59,7 +56,7 @@ public class RolesEntity {
         this.roleName = roleName;
     }
 
-    public void setRoleId(int roleId) {
+    public void setRoleId(Integer roleId) {
         this.roleId = roleId;
     }
 
@@ -79,14 +76,15 @@ public class RolesEntity {
         this.userRoles = userRoles;
     }
 
-    public Set<PermissionEntity> getPermissions() {
-        return permissions;
+    public Set<RolePermissionEntity> getRolePermission() {
+        return rolePermission;
     }
 
-    public void setPermissions(Set<PermissionEntity> permissions) {
-        permissions = permissions;
+    public void setRolePermission(Set<RolePermissionEntity> rolePermission) {
+        this.rolePermission = rolePermission;
     }
-/*public Integer getTenantId() {
+
+   /*public Integer getTenantId() {
         return tenantId;
     }
 

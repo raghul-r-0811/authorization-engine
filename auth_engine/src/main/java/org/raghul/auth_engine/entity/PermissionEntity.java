@@ -1,6 +1,7 @@
 package org.raghul.auth_engine.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,12 +12,14 @@ public class PermissionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer permissionId;
 
-    private  String permissionName;
+    @NotNull
+    @Column(nullable = false,unique = true)
+    private String permissionName;
 
     private String description;
 
-    @ManyToMany(mappedBy = "permissions")
-    private Set<RolesEntity> roles = new HashSet<>();
+    @OneToMany(mappedBy = "permission")
+    private Set<RolePermissionEntity> rolePermission = new HashSet<>();
 
     public String getPermissionName() {
         return permissionName;
@@ -30,7 +33,7 @@ public class PermissionEntity {
         return permissionId;
     }
 
-    public void setPermissionId(Integer permissionId) {
+    private void setPermissionId(Integer permissionId) {
         this.permissionId = permissionId;
     }
 
@@ -42,11 +45,11 @@ public class PermissionEntity {
         this.description = description;
     }
 
-    public Set<RolesEntity> getRoles() {
-        return roles;
+    public Set<RolePermissionEntity> getRolesPermission() {
+        return rolePermission;
     }
 
-    public void setRoles(Set<RolesEntity> roles) {
-        this.roles = roles;
+    public void setRolesPermission(Set<RolePermissionEntity> rolePermission) {
+        this.rolePermission = rolePermission;
     }
 }

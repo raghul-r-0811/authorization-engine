@@ -1,7 +1,9 @@
 package org.raghul.auth_engine.service;
 
+import org.raghul.auth_engine.dto.AssignRoleRequest;
 import org.raghul.auth_engine.dto.RegisterUserRequest;
 import org.raghul.auth_engine.entity.*;
+import org.raghul.auth_engine.exception.ResourceNotFoundException;
 import org.raghul.auth_engine.repository.RolesRepo;
 import org.raghul.auth_engine.repository.TenantRepo;
 import org.raghul.auth_engine.repository.UserRepo;
@@ -32,10 +34,13 @@ public class UserService {
 
 
     @Transactional
-    public boolean registerUser(RegisterUserRequest newUser){
+    public boolean registerUser(RegisterUserRequest newUser) {
 
-        RolesEntity currentRole = rolesRepo.findById(newUser.roleId()) .orElseThrow(() -> new RuntimeException("Invalid role id"));;
-        TenantEntity currentTenant = tenantRepo.findById(newUser.tenantId()).orElseThrow(()-> new RuntimeException("Invalid tenant id"));
+        RolesEntity currentRole = rolesRepo.findById(newUser.roleId())
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid role id: " + newUser.roleId()));
+
+        TenantEntity currentTenant = tenantRepo.findById(newUser.tenantId())
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid tenant id: " + newUser.tenantId()));
 
         if (userRepo.existsByTenantAndEmail(currentTenant, newUser.u_email())) {
             throw new IllegalArgumentException("Email already exists in this tenant");
@@ -47,17 +52,48 @@ public class UserService {
         user.setName(newUser.u_name());
         user.setTenant(currentTenant);
 
-        validateUserRoleAssignment(user, currentRole, currentTenant);
+        UserEntity savedUser = userRepo.save(user);
 
-        UserEntity currentUser = userRepo.save(user);
+        assignRoleToUser(savedUser, currentRole, currentTenant);
 
-        UserRoleEntity currentUserRole = new UserRoleEntity();
-        currentUserRole.setRole(currentRole);
-        currentUserRole.setUser(currentUser);
-        currentUserRole.setTenant(currentTenant);
-        userRoleRepo.save(currentUserRole);
         return true;
     }
+
+    @Transactional
+    public UserRoleEntity addRoleToExistingUser(AssignRoleRequest request) {
+
+        UserEntity user = userRepo.findById(request.userId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.userId()));
+
+        RolesEntity role = rolesRepo.findById(request.roleId())
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + request.roleId()));
+
+        TenantEntity tenant = null;
+        if (request.tenantId() != null) {
+            tenant = tenantRepo.findById(request.tenantId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Tenant not found with id: " + request.tenantId()));
+        }
+
+        return assignRoleToUser(user, role, tenant);
+    }
+
+    private UserRoleEntity assignRoleToUser(UserEntity user, RolesEntity role, TenantEntity assignmentTenant) {
+
+        validateUserRoleAssignment(user, role, assignmentTenant);
+
+        boolean alreadyAssigned = userRoleRepo.existsByUserAndRoleAndTenant(user, role, assignmentTenant);
+        if (alreadyAssigned) {
+            throw new IllegalArgumentException("This role is already assigned to the user");
+        }
+
+        UserRoleEntity userRole = new UserRoleEntity();
+        userRole.setUser(user);
+        userRole.setRole(role);
+        userRole.setTenant(assignmentTenant);
+
+        return userRoleRepo.save(userRole);
+    }
+
     //fuction for userLogin for any organization
     public boolean login(RegisterUserRequest loginUser){
         // for given pw and email cross check whether

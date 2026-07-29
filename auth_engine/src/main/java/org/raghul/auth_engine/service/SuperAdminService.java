@@ -1,18 +1,20 @@
 package org.raghul.auth_engine.service;
 
-import org.raghul.auth_engine.dto.RegisterRoleRequest;
-import org.raghul.auth_engine.dto.RegisterTenantRequest;
-import org.raghul.auth_engine.dto.RegisterUserRequest;
+import org.raghul.auth_engine.dto.*;
 import org.raghul.auth_engine.entity.*;
-import org.raghul.auth_engine.repository.RolesRepo;
-import org.raghul.auth_engine.repository.TenantRepo;
-import org.raghul.auth_engine.repository.UserRepo;
-import org.raghul.auth_engine.repository.UserRoleRepo;
+import org.raghul.auth_engine.exception.ResourceNotFoundException;
+import org.raghul.auth_engine.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -30,6 +32,8 @@ public class SuperAdminService {
     BCryptPasswordEncoder passwordEncoder;
     @Autowired
     UserRoleRepo userRoleRepo;
+    @Autowired
+    PermissionRepo permissionRepo;
 
 
     @Autowired
@@ -95,4 +99,53 @@ public class SuperAdminService {
         return rolesRepo.save(currRole);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public PermissionEntity createNewPermission(RegisterPermissionRequest newPermission) {
+        PermissionEntity permissionEntity = new PermissionEntity();
+        permissionEntity.setDescription(newPermission.description());
+        permissionEntity.setPermissionName(newPermission.permissionName());
+        return permissionRepo.save(permissionEntity);
+    }
+
+    @Transactional
+    public List<RolePermissionEntity> setNewPermissionsToRole(SetPermissionRequest request) {
+
+        RolesEntity role = rolesRepo.findById(request.roleId()).orElseThrow(() ->
+                        new ResourceNotFoundException("Role not found with id: " + request.roleId()));
+
+        Set<String> requestedNames = request.permissionSet();
+        List<PermissionEntity> foundPermissions = permissionRepo.findByPermissionNameIn(requestedNames);
+
+        Set<String> foundNames = foundPermissions.stream()
+                .map(PermissionEntity::getPermissionName)
+                .collect(Collectors.toSet());
+
+        Set<String> missingNames = requestedNames.stream()
+                .filter(name -> !foundNames.contains(name))
+                .collect(Collectors.toSet());
+
+        if (!missingNames.isEmpty()) {
+            throw new ResourceNotFoundException("Permissions not found: " + missingNames);
+        }
+
+        Set<String> alreadyAssignedNames = role.getRolePermission().stream()
+                .map(rolePermission -> rolePermission.getPermission().getPermissionName())
+                .collect(Collectors.toSet());
+
+        List<RolePermissionEntity> newAssignments = new ArrayList<>();
+
+        for (PermissionEntity permission : foundPermissions) {
+            if (!alreadyAssignedNames.contains(permission.getPermissionName())) {
+                RolePermissionEntity rolePermission = new RolePermissionEntity();
+                rolePermission.setRole(role);
+                rolePermission.setPermission(permission);
+
+                role.getRolePermission().add(rolePermission);
+                newAssignments.add(rolePermission);
+            }
+        }
+
+        rolesRepo.save(role);
+        return newAssignments;
+    }
 }

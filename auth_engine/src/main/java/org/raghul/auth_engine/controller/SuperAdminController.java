@@ -1,14 +1,11 @@
 package org.raghul.auth_engine.controller;
 
 
-import org.raghul.auth_engine.dto.ApiResponse;
-import org.raghul.auth_engine.dto.RegisterRoleRequest;
-import org.raghul.auth_engine.dto.RegisterTenantRequest;
-import org.raghul.auth_engine.dto.RegisterUserRequest;
-import org.raghul.auth_engine.entity.RolesEntity;
-import org.raghul.auth_engine.entity.TenantEntity;
-import org.raghul.auth_engine.entity.UserEntity;
+import org.hibernate.validator.constraints.ParameterScriptAssert;
+import org.raghul.auth_engine.dto.*;
+import org.raghul.auth_engine.entity.*;
 import org.raghul.auth_engine.service.SuperAdminService;
+import org.raghul.auth_engine.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +15,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/app/admin")
 public class SuperAdminController {
     @Autowired
     SuperAdminService superAdminService;
+
+    @Autowired
+    UserService userService;
 
     //add a new Tenant in the tenant table.
    // @PreAuthorize("hasRole('SUPER_ADMIN')")
@@ -54,5 +56,28 @@ public class SuperAdminController {
         RolesEntity savedRole = superAdminService.addNewRole(newRole);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("Role created successfully", savedRole));
     }
+
+    @PostMapping("/assignRole")
+    public ResponseEntity<ApiResponse> assignRoleToExistingUser(@RequestBody AssignRoleRequest request) {
+        UserRoleEntity assignedRole = userService.addRoleToExistingUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse("Role assigned to user successfully", assignedRole));
+    }
+
+    @PostMapping("/createPermission")
+    public ResponseEntity<ApiResponse> createPermission(@RequestBody RegisterPermissionRequest newPermission){
+        PermissionEntity createdPermission =  superAdminService.createNewPermission(newPermission);
+        return  ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("New Permission created",createdPermission));
+    }
+    /**
+     *Used to set a permissions to a role.
+     **/
+
+    @PostMapping("setPermission")
+    public ResponseEntity<ApiResponse> setPermissionToRole(@RequestBody SetPermissionRequest setPermissionRequest){
+        List<RolePermissionEntity> rolePermission= superAdminService.setNewPermissionsToRole(setPermissionRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("All permissions are set to the givenRole",rolePermission));
+    }
+
 
 }
