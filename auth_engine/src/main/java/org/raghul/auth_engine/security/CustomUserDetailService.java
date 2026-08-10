@@ -23,12 +23,10 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        System.out.println("=====================loadUserByName in CustomerUserDetailService ==============================");
-        UserEntity user = userRepo.findByEmail(username);
-        if(user == null ){
-            throw new UsernameNotFoundException("Email id not found");
-        }
-        UserDetails userDetails = new CustomUserDetails(user);
-        return userDetails;
+       // System.out.println("=====================loadUserByName in CustomerUserDetailService ==============================");
+        UserEntity user = userRepo.findByEmailWithRolesAndPermissions(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Email id not found"));
+
+        return new CustomUserDetails(user);
     }
 }

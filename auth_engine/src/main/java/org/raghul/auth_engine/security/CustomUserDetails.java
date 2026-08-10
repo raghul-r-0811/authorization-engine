@@ -1,14 +1,12 @@
 package org.raghul.auth_engine.security;
 
-import org.raghul.auth_engine.entity.RolesEntity;
-import org.raghul.auth_engine.entity.UserEntity;
-import org.raghul.auth_engine.entity.UserRoleEntity;
+import org.raghul.auth_engine.entity.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class CustomUserDetails implements UserDetails {
     private UserEntity user;
@@ -21,7 +19,7 @@ public class CustomUserDetails implements UserDetails {
     }
 
     public List<String> getRoleNames() {
-        System.out.println("----------temp buff--------------");
+       // System.out.println("----------temp buff--------------");
        // return "temp buff";
         return user.getUserRoles().stream()
                 .map(UserRoleEntity::getRole)
@@ -30,15 +28,44 @@ public class CustomUserDetails implements UserDetails {
     }
 
 
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getUserRoles().stream()
-                .map(UserRoleEntity::getRole)
-                .filter(role -> role != null && role.getRoleName() != null)
-                .map(RolesEntity::getRoleName)
-                .distinct()
-                .map(roleName -> new SimpleGrantedAuthority("ROLE_" + roleName))
-                .toList();
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+        for (UserRoleEntity userRole : user.getUserRoles()) {
+            if (userRole.getRole() == null) {
+                continue;
+            }
+
+            RolesEntity role = userRole.getRole();
+
+            if (role.getRoleName() != null) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRoleName()));
+            }
+
+            if (role.getRolePermission() != null) {
+                for (RolePermissionEntity rolePermission : role.getRolePermission()) {
+                    if (rolePermission.getPermission() == null) {
+                        continue;
+                    }
+
+                    PermissionEntity permission = rolePermission.getPermission();
+
+                    if (permission.getPermissionName() != null) {
+                        authorities.add(new SimpleGrantedAuthority(permission.getPermissionName()));
+                    }
+                }
+            }
+        }
+
+        /*System.out.println("Authorities added for user " + user.getEmail() + ":");
+        for (GrantedAuthority authority : authorities) {
+            System.out.println(authority.getAuthority());
+        }*/
+
+        return authorities;
     }
 
     @Override

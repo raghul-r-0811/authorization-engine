@@ -44,7 +44,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/app/home/register","/app/home/login","/app/admin/addTenant","/app/admin/addRoles","/app/admin/registerSuperAdminUser").permitAll()
+                        .requestMatchers("/app/home/login").permitAll()
                         .anyRequest().authenticated()).sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -72,7 +72,7 @@ public class SecurityConfig {
             @Override
             protected Authentication createSuccessAuthentication(Object principal, Authentication authentication,
                                                                  UserDetails user) {
-                System.out.println("-------------createSuccessAuthentication() is called in DaoAuthenticationManager");
+                //System.out.println("-------------createSuccessAuthentication() is called in DaoAuthenticationManager");
                 //debugStack();
                 return super.createSuccessAuthentication(principal,authentication,user);
             }
@@ -88,7 +88,4 @@ public class SecurityConfig {
         //System.out.println("================"+ authenticationManager.getClass());
         return authenticationManager;
     }
-
-
-
 }

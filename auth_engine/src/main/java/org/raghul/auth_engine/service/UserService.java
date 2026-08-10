@@ -1,6 +1,7 @@
 package org.raghul.auth_engine.service;
 
 import org.raghul.auth_engine.dto.AssignRoleRequest;
+import org.raghul.auth_engine.dto.DeleteUserRequest;
 import org.raghul.auth_engine.dto.RegisterUserRequest;
 import org.raghul.auth_engine.entity.*;
 import org.raghul.auth_engine.exception.ResourceNotFoundException;
@@ -9,6 +10,7 @@ import org.raghul.auth_engine.repository.TenantRepo;
 import org.raghul.auth_engine.repository.UserRepo;
 import org.raghul.auth_engine.repository.UserRoleRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +34,7 @@ public class UserService {
         this.userRepo = userRepo;
     }
 
-
+    @PreAuthorize("hasAuthority('CREATE_USER')")
     @Transactional
     public boolean registerUser(RegisterUserRequest newUser) {
 
@@ -59,6 +61,7 @@ public class UserService {
         return true;
     }
 
+    @PreAuthorize("hasAuthority('ASSIGN_ROLE')")
     @Transactional
     public UserRoleEntity addRoleToExistingUser(AssignRoleRequest request) {
 
@@ -77,6 +80,8 @@ public class UserService {
         return assignRoleToUser(user, role, tenant);
     }
 
+
+    @PreAuthorize("hasAuthority('ASSIGN_ROLE')")
     private UserRoleEntity assignRoleToUser(UserEntity user, RolesEntity role, TenantEntity assignmentTenant) {
 
         validateUserRoleAssignment(user, role, assignmentTenant);
@@ -95,10 +100,10 @@ public class UserService {
     }
 
     //fuction for userLogin for any organization
-    public boolean login(RegisterUserRequest loginUser){
+   /* public boolean login(RegisterUserRequest loginUser){
         // for given pw and email cross check whether
         return false;
-    }
+    }*/
 
     /**
      * Whether this role with this scope is valid for user with tenant.
@@ -131,4 +136,9 @@ public class UserService {
         }
     }
 
+    @PreAuthorize("hasAuthority('DELETE_USER')")
+    public boolean deleteUser(DeleteUserRequest deleteUserRequest){
+        userRepo.deleteById(deleteUserRequest.userId());
+        return true;
+    }
 }

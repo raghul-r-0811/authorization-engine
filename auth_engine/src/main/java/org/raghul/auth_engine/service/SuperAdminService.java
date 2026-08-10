@@ -10,10 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -22,7 +19,6 @@ public class SuperAdminService {
     TenantRepo tenantRepo;
     RolesRepo rolesRepo;
     UserRepo userRepo;
-
 
     /**
      * These two(passwordEncoder and userRoleRepo) and {@link SuperAdminService#addSuperAdmin(RegisterUserRequest)}
@@ -43,6 +39,8 @@ public class SuperAdminService {
         this.userRepo = userRepo;
     }
 
+
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @Transactional
     public UserEntity addSuperAdmin(RegisterUserRequest newUser) {
 
@@ -79,11 +77,11 @@ public class SuperAdminService {
         currTenant.setTenantName(newTenant.tenantName());
         return tenantRepo.save(currTenant);
     }
-
-    public RolesEntity addNewRole(RegisterRoleRequest newRole) {
+    @PreAuthorize("hasAuthority('ROLE_CREATE')")
+    public RolesEntity createNewRole(RegisterRoleRequest newRole) {
 
         RolesEntity currRole = new RolesEntity();
-        currRole.setRoleName(newRole.roleName());
+        currRole.setRoleName(newRole.roleName());::wq
         currRole.setDescription(newRole.description());
         currRole.setScopeType(newRole.scope());
 
@@ -107,6 +105,9 @@ public class SuperAdminService {
         return permissionRepo.save(permissionEntity);
     }
 
+
+
+    @PreAuthorize("hasAuthority('SET_PERMISSION')")
     @Transactional
     public List<RolePermissionEntity> setNewPermissionsToRole(SetPermissionRequest request) {
 
@@ -114,8 +115,10 @@ public class SuperAdminService {
                         new ResourceNotFoundException("Role not found with id: " + request.roleId()));
 
         Set<String> requestedNames = request.permissionSet();
-        List<PermissionEntity> foundPermissions = permissionRepo.findByPermissionNameIn(requestedNames);
+        System.out.println("------------------------------REACHED here-------------------------------");
 
+        List<PermissionEntity> foundPermissions = permissionRepo.findByPermissionNameIn(requestedNames);
+        System.out.println("------------------------------CROSSED here-------------------------------");
         Set<String> foundNames = foundPermissions.stream()
                 .map(PermissionEntity::getPermissionName)
                 .collect(Collectors.toSet());
@@ -125,6 +128,9 @@ public class SuperAdminService {
                 .collect(Collectors.toSet());
 
         if (!missingNames.isEmpty()) {
+            for(String str : missingNames){
+                System.out.println("----------------- missing permission name ---------- :"+str);
+            }
             throw new ResourceNotFoundException("Permissions not found: " + missingNames);
         }
 
@@ -143,6 +149,7 @@ public class SuperAdminService {
                 role.getRolePermission().add(rolePermission);
                 newAssignments.add(rolePermission);
             }
+
         }
 
         rolesRepo.save(role);
