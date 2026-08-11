@@ -10,10 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -53,7 +51,7 @@ public class SuperAdminController {
 
     @PostMapping("/addRoles")
     public ResponseEntity<ApiResponse> addTenantAdminRole(@RequestBody RegisterRoleRequest newRole){
-        RolesEntity savedRole = superAdminService.addNewRole(newRole);
+        RolesEntity savedRole = superAdminService.createNewRole(newRole);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("Role created successfully", savedRole));
     }
 
@@ -75,8 +73,19 @@ public class SuperAdminController {
 
     @PostMapping("setPermission")
     public ResponseEntity<ApiResponse> setPermissionToRole(@RequestBody SetPermissionRequest setPermissionRequest){
-        List<RolePermissionEntity> rolePermission= superAdminService.setNewPermissionsToRole(setPermissionRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("All permissions are set to the givenRole",rolePermission));
+        List<RolePermissionEntity> saved = superAdminService.setNewPermissionsToRole(setPermissionRequest);
+
+        List<RolePermissionResponse> response = saved.stream()
+                .map(rp -> new RolePermissionResponse(
+                        rp.getRole().getRoleId(),
+                        rp.getRole().getRoleName(),
+                        rp.getPermission().getPermissionId(),
+                        rp.getPermission().getPermissionName()
+                ))
+                .toList();
+
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("All permissions are set to the givenRole",response));
     }
 
 

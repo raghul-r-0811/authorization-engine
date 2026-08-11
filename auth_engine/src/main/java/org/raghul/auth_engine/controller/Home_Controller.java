@@ -75,7 +75,7 @@ public class Home_Controller {
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody @Valid LoginRequest userLogin){
-        System.out.println("------------------------------------Authenticating------------------------------------");
+       // System.out.println("------------------------------------Authenticating------------------------------------");
         Authentication authentication =  authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userLogin.email(),userLogin.password())); /**{@link AbstractUserDetailsAuthenticationProvider#authenticate(Authentication)}**/
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
