@@ -141,4 +141,36 @@ public class UserService {
         userRepo.deleteById(deleteUserRequest.userId());
         return true;
     }
+
+    /**
+     * Whether this role with this scope is valid for user with tenant.
+     * **/
+    private void validateUserRoleAssignment(UserEntity user, RolesEntity role, TenantEntity assignmentTenant) {
+
+        if (role.getScopeType() == ScopeType.PLATFORM) {
+            if (assignmentTenant!=  null) {
+                throw new IllegalArgumentException("Platform role cannot have tenant");
+            }
+            if (user.getTenant() != null) {
+                throw new IllegalArgumentException("Platform user cannot have tenant");
+            }
+            return;
+        }
+
+        if (role.getScopeType() == ScopeType.TENANT) {
+            if (assignmentTenant == null) {
+                throw new IllegalArgumentException("Tenant role requires tenant");
+            }
+            if (user.getTenant() == null) {
+                throw new IllegalArgumentException("Tenant user must belong to a tenant");
+            }
+            if (!user.getTenant().getTenantId().equals(assignmentTenant.getTenantId())) {
+                throw new IllegalArgumentException("User tenant mismatch");
+            }
+            if (role.getTenant() == null || !role.getTenant().getTenantId().equals(assignmentTenant.getTenantId())) {
+                throw new IllegalArgumentException("Role tenant mismatch");
+            }
+        }
+    }
+
 }

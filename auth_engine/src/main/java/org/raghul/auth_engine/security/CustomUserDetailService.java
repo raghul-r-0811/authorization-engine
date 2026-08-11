@@ -21,7 +21,12 @@ public class CustomUserDetailService implements UserDetailsService {
     @Autowired
     UserRepo userRepo;
 
-    @Override
+
+  // here the old one was causing n+1 query problem because of lazy loading of all the roles and permissions
+  // so fixed by adding custom JPQL JOIN FETCH query that retrieves the user, tenant, roles, 
+  //and permissions in a single database call, 
+  //eliminating N+1 lazy-loading queries during authority generation.
+  @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
        // System.out.println("=====================loadUserByName in CustomerUserDetailService ==============================");
         UserEntity user = userRepo.findByEmailWithRolesAndPermissions(username)
