@@ -90,3 +90,58 @@ This allows the system to support both general RBAC behavior and selective resou
 - [X] Register a user with SUPER_ADMIN role with null tenant, Register users with other roles with non null tenant.
 - [X] Role validation (is this user_role can be created or not)
 - [ ] Permission Enrollment
+
+---
+
+### 12/08/2026 
+### Introduced scopes for permissions.
+
+The reason is to scale it better for the future.
+
+#### Current Scenario : 
+- There is only one Platform Level user with the "MAIN_ADMIN" role.
+- Platform level operations are restricted using "is this user has the "MAIN_ADMIN" role?" check.
+
+#### Potential Future Problem seen:
+If the platform needs a support user to maintain the platform, there the application will encounter problem.
+All the support user need to is monitor tenant actions logs, or create new Tenant but not delete a tenant.
+Even if the SUPPORT user doesn't have the authority delete a tenant, but to do other platform level things like see tenant status or something(no write scenario)
+I might need to do add seperate code for different platform level role, like different endPoints, role checks, service methods the enitre flow will be have to duplicated even for read operations.
+
+## Solution proposed :
+ Introduce permissions for platform level actions too. So instead of role check we can do ROLE check + PERMISSION check.
+
+But the above solution creates a new problem.
+
+### New problem:
+- In the current design TENANT admins can create custom tenant specific roles, and set permissions to that roles.
+- Here the permission for resources are defined by PLATFORM, but it is shared for both tenants and platform user.
+- In the current state there is no restriction that this role can set a certain set of permissions to their users.
+
+For example,
+- When I introduced new platform level roles and permissions for that role.
+But those permissions are sensitive permissions like, platform level user can CREATE a new tenant.
+
+In current scenario all the permission share the same table and there is no restriction for tenant admin to set 
+that permission to create a new tenant user.
+
+    
+
+#### The main Problem : "Current design doesn't scale well in Multi platform level user scenario"
+
+### SOLUTION : Scopes for permissions 
+Action : CREATE/ADD new tenant. 
+
+ What do you need ? 
+ - You need a platform level permission to do that.
+    
+Who can give me the permission?
+ - Only platform level user can give you that permission.
+
+    
+### NOTE : 
+ - As of now there is no plan of using Platform level permissions.
+ - The proposed solution is to scale the application well in the future.
+
+But restricting the permission assignment to roles using the Permission scope will be used.
+

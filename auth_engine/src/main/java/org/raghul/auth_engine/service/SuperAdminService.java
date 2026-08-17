@@ -77,25 +77,6 @@ public class SuperAdminService {
         currTenant.setTenantName(newTenant.tenantName());
         return tenantRepo.save(currTenant);
     }
-    @PreAuthorize("hasAuthority('ROLE_CREATE')")
-    public RolesEntity createNewRole(RegisterRoleRequest newRole) {
-
-        RolesEntity currRole = new RolesEntity();
-        currRole.setRoleName(newRole.roleName());::wq
-        currRole.setDescription(newRole.description());
-        currRole.setScopeType(newRole.scope());
-
-        if (newRole.scope() == ScopeType.TENANT) {
-            TenantEntity currentTenant = tenantRepo.findById(newRole.tenantId())
-                    .orElseThrow(() -> new RuntimeException("Invalid tenant id"));
-            currRole.setTenant(currentTenant);
-        } else if (newRole.scope() == ScopeType.PLATFORM) {
-            currRole.setTenant(null);
-        } else {
-            throw new RuntimeException("Invalid scope");
-        }
-        return rolesRepo.save(currRole);
-    }
 
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public PermissionEntity createNewPermission(RegisterPermissionRequest newPermission) {
@@ -105,54 +86,11 @@ public class SuperAdminService {
         return permissionRepo.save(permissionEntity);
     }
 
-
-
-    @PreAuthorize("hasAuthority('SET_PERMISSION')")
-    @Transactional
-    public List<RolePermissionEntity> setNewPermissionsToRole(SetPermissionRequest request) {
-
-        RolesEntity role = rolesRepo.findById(request.roleId()).orElseThrow(() ->
-                        new ResourceNotFoundException("Role not found with id: " + request.roleId()));
-
-        Set<String> requestedNames = request.permissionSet();
-        System.out.println("------------------------------REACHED here-------------------------------");
-
-        List<PermissionEntity> foundPermissions = permissionRepo.findByPermissionNameIn(requestedNames);
-        System.out.println("------------------------------CROSSED here-------------------------------");
-        Set<String> foundNames = foundPermissions.stream()
-                .map(PermissionEntity::getPermissionName)
-                .collect(Collectors.toSet());
-
-        Set<String> missingNames = requestedNames.stream()
-                .filter(name -> !foundNames.contains(name))
-                .collect(Collectors.toSet());
-
-        if (!missingNames.isEmpty()) {
-            for(String str : missingNames){
-                System.out.println("----------------- missing permission name ---------- :"+str);
-            }
-            throw new ResourceNotFoundException("Permissions not found: " + missingNames);
-        }
-
-        Set<String> alreadyAssignedNames = role.getRolePermission().stream()
-                .map(rolePermission -> rolePermission.getPermission().getPermissionName())
-                .collect(Collectors.toSet());
-
-        List<RolePermissionEntity> newAssignments = new ArrayList<>();
-
-        for (PermissionEntity permission : foundPermissions) {
-            if (!alreadyAssignedNames.contains(permission.getPermissionName())) {
-                RolePermissionEntity rolePermission = new RolePermissionEntity();
-                rolePermission.setRole(role);
-                rolePermission.setPermission(permission);
-
-                role.getRolePermission().add(rolePermission);
-                newAssignments.add(rolePermission);
-            }
-
-        }
-
-        rolesRepo.save(role);
-        return newAssignments;
-    }
 }
+/*
+* {
+  "roleName": "SUPER_ADMIN",
+  "description": "Platform level admin with maximum access",
+  "scope": "PLATFORM"
+}
+* */

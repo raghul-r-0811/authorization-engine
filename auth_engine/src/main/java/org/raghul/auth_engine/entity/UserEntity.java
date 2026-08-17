@@ -35,7 +35,6 @@ public class UserEntity {
     private Set<UserRoleEntity> userRoles = new HashSet<>();
 
 
-
     public Integer getuId() {
         return uId;
     }

@@ -37,7 +37,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
          * so that @PreAuthorize can use it
          * **/
         if (jwtService.isTokenValid(token)) {
+
             String userEmail = jwtService.extractUserEmail(token);
+            Integer tenantId = jwtService
+                    .extractUserDetailsFromToken(token)
+                    .get("tenantId", Integer.class);
             /*
             List<String> roles = jwtService.extractRoles(token);
             List<GrantedAuthority> authorities = roles.stream()
@@ -48,6 +52,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     .map(role -> (GrantedAuthority) new SimpleGrantedAuthority(role))
                     .toList();
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userEmail, null, authorities);
+            authToken.setDetails(tenantId);
+
+
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
         filterChain.doFilter(request, response);

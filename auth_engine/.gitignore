@@ -38,4 +38,4 @@ out/
 
 ### For local use only #####
 auth_engine/src/main/resources/credentials.txt
-
+auth_engine/.gitignore

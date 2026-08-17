@@ -49,18 +49,9 @@ public class SuperAdminController {
     */
 
 
-    @PostMapping("/addRoles")
-    public ResponseEntity<ApiResponse> addTenantAdminRole(@RequestBody RegisterRoleRequest newRole){
-        RolesEntity savedRole = superAdminService.createNewRole(newRole);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("Role created successfully", savedRole));
-    }
 
-    @PostMapping("/assignRole")
-    public ResponseEntity<ApiResponse> assignRoleToExistingUser(@RequestBody AssignRoleRequest request) {
-        UserRoleEntity assignedRole = userService.addRoleToExistingUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse("Role assigned to user successfully", assignedRole));
-    }
+
+
 
     @PostMapping("/createPermission")
     public ResponseEntity<ApiResponse> createPermission(@RequestBody RegisterPermissionRequest newPermission){
@@ -71,22 +62,7 @@ public class SuperAdminController {
      *Used to set a permissions to a role.
      **/
 
-    @PostMapping("setPermission")
-    public ResponseEntity<ApiResponse> setPermissionToRole(@RequestBody SetPermissionRequest setPermissionRequest){
-        List<RolePermissionEntity> saved = superAdminService.setNewPermissionsToRole(setPermissionRequest);
 
-        List<RolePermissionResponse> response = saved.stream()
-                .map(rp -> new RolePermissionResponse(
-                        rp.getRole().getRoleId(),
-                        rp.getRole().getRoleName(),
-                        rp.getPermission().getPermissionId(),
-                        rp.getPermission().getPermissionName()
-                ))
-                .toList();
-
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("All permissions are set to the givenRole",response));
-    }
 
 
 }
