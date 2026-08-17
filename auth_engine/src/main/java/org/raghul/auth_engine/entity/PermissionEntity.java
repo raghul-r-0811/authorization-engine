@@ -13,10 +13,16 @@ public class PermissionEntity {
     private Integer permissionId;
 
     @NotNull
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false, unique = true)
     private String permissionName;
 
     private String description;
+
+    //determines whether this permission may be attached to a PLATFORM role, a TENANT role, or both
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PermissionApplicability applicability;
 
     @OneToMany(mappedBy = "permission")
     private Set<RolePermissionEntity> rolePermission = new HashSet<>();
@@ -43,6 +49,16 @@ public class PermissionEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+
+    public PermissionApplicability getApplicability() {
+        return applicability;
+    }
+
+
+    public void setApplicability(PermissionApplicability applicability) {
+        this.applicability = applicability;
     }
 
     public Set<RolePermissionEntity> getRolesPermission() {

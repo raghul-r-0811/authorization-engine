@@ -111,4 +111,10 @@ public class CustomUserDetails implements UserDetails {
     public int getUserId(){
         return user.getuId();
     }
+
+    public boolean isSuperAdmin() {
+        return getAuthorities().stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_SUPER_ADMIN"));
+    }
 }
