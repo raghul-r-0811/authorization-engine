@@ -1,13 +1,13 @@
 package org.raghul.auth_engine.controller;
 
 import jakarta.validation.Valid;
-import org.raghul.auth_engine.dto.LoginRequest;
-import org.raghul.auth_engine.dto.LoginResponse;
-import org.raghul.auth_engine.dto.RegisterUserRequest;
+import org.raghul.auth_engine.dto.*;
+import org.raghul.auth_engine.entity.UserEntity;
 import org.raghul.auth_engine.security.CustomUserDetails;
 import org.raghul.auth_engine.security.JwtService;
 import org.raghul.auth_engine.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
@@ -47,9 +47,17 @@ public class Home_Controller {
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody @Valid RegisterUserRequest newUser){
-        userService.registerUser(newUser);
-        return "registeration done";
+    public ResponseEntity<ApiResponse> register(@RequestBody @Valid RegisterUserRequest newUser){
+        UserEntity savedUser = userService.registerUser(newUser);
+        UserResponse userResponse = new UserResponse(
+                savedUser.getuId(),
+                savedUser.getName(),
+                savedUser.getEmail(),
+                savedUser.getTenant().getTenantId()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse("New user registere successfully", userResponse));
+
     }
 
 

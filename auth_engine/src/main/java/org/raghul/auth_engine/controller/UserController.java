@@ -1,10 +1,13 @@
 package org.raghul.auth_engine.controller;
 
 
+import lombok.RequiredArgsConstructor;
 import org.raghul.auth_engine.dto.*;
 import org.raghul.auth_engine.entity.RolePermissionEntity;
 import org.raghul.auth_engine.entity.RolesEntity;
+import org.raghul.auth_engine.entity.UserEntity;
 import org.raghul.auth_engine.entity.UserRoleEntity;
+import org.raghul.auth_engine.service.UserRoleService;
 import org.raghul.auth_engine.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,15 +21,25 @@ import java.util.List;
 
 @RestController
 @RequestMapping("app/user/")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    UserService userService;
 
-    @PostMapping
-    public boolean deleteUser(DeleteUserRequest deleteUserRequest){
-        userService.deleteUser(deleteUserRequest);
-        return  true;
+    private final UserService userService;
+    private final UserRoleService userRoleService;
+
+
+    @PostMapping("/deleteUser")
+    public ResponseEntity<ApiResponse> deleteUser(@RequestBody DeleteUserRequest deleteUserRequest){
+        UserEntity deletedUser = userService.deleteUser(deleteUserRequest);
+        UserResponse userResponse = new UserResponse(
+                deletedUser.getuId(),
+                deletedUser.getName(),
+                deletedUser.getEmail(),
+                deletedUser.getTenant().getTenantId()
+        );
+        return ResponseEntity.status(HttpStatus.GONE)
+                .body(new ApiResponse("Role assigned to user successfully", userResponse));
     }
 
     @PostMapping("/createRole")
@@ -55,7 +68,7 @@ public class UserController {
 
     @PostMapping("/assignRole")
     public ResponseEntity<ApiResponse> assignRoleToExistingUser(@RequestBody AssignRoleRequest request) {
-        UserRoleEntity assignedRole = userService.addRoleToExistingUser(request);
+        UserRoleEntity assignedRole = userRoleService.addRoleToExistingUser(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse("Role assigned to user successfully", assignedRole));
     }
