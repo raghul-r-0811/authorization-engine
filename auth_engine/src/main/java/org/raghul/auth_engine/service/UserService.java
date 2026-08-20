@@ -1,10 +1,13 @@
 package org.raghul.auth_engine.service;
 
+import lombok.RequiredArgsConstructor;
 import org.raghul.auth_engine.dto.*;
 import org.raghul.auth_engine.entity.*;
+import org.raghul.auth_engine.entity.audit.AuditAction;
+import org.raghul.auth_engine.entity.audit.AuditDecision;
 import org.raghul.auth_engine.exception.ResourceNotFoundException;
 import org.raghul.auth_engine.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,47 +19,55 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-    //@Autowired
-    public UserRepo userRepo;
-    @Autowired
-    private RolesRepo rolesRepo;
-    @Autowired
-    private TenantRepo tenantRepo;
-    @Autowired
-    private UserRoleRepo userRoleRepo;
-    @Autowired
-    PermissionRepo permissionRepo;
-    @Autowired
-    TenantAuthorizationService tenantAuthorizationService;
 
-
-    @Autowired
-    public UserService(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final UserRepo userRepo;
+    private final RolesRepo rolesRepo;
+    private final TenantRepo tenantRepo;
+    private final PermissionRepo permissionRepo;
+    private final TenantAuthorizationService tenantAuthorizationService;
+    private final UserRoleService userRoleService;
+    private final AuditLogService auditLogService;
+    private final CurrentUserService currentUserService;
 
     @PreAuthorize("hasAuthority('USER_CREATE')")
     @Transactional
-    public boolean registerUser(RegisterUserRequest newUser) {
+    public UserEntity registerUser(RegisterUserRequest newUser) {
 
         RolesEntity currentRole = rolesRepo.findById(newUser.roleId())
-                .orElseThrow(() -> new ResourceNotFoundException("Invalid role id: " + newUser.roleId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Invalid role id: " + newUser.roleId()
+                ));
 
         TenantEntity currentTenant = tenantRepo.findById(newUser.tenantId())
-                .orElseThrow(() -> new ResourceNotFoundException("Invalid tenant id: " + newUser.tenantId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Invalid tenant id: " + newUser.tenantId()
+                ));
 
-        tenantAuthorizationService.verifyCanAccessTenant(currentTenant.getTenantId());
+        CurrentUserService.CurrentActor actor =
+                currentUserService.getCurrentActor();
+
+        Integer targetTenantId = currentTenant.getTenantId();
+
+        try {
+            tenantAuthorizationService.verifyCanAccessTenant(targetTenantId);
+        } catch (AccessDeniedException exception) {
+
+            auditLogService.logDenied(new AuditLogRequest(actor.userId(), actor.tenantId(),
+                    AuditAction.USER_CREATE,"USER",null,
+                    targetTenantId,AuditDecision.DENY,exception.getMessage()
+            ));
+
+            throw exception;
+        }
 
         if (userRepo.existsByTenantAndEmail(currentTenant, newUser.u_email())) {
-            throw new IllegalArgumentException("Email already exists in this tenant");
+            throw new IllegalArgumentException(
+                    "Email already exists in this tenant"
+            );
         }
-        /**
-         * ------------cross tenant action check-----------
-         * **/
-
 
         UserEntity user = new UserEntity();
         user.setEmail(newUser.u_email());
@@ -66,114 +77,53 @@ public class UserService {
 
         UserEntity savedUser = userRepo.save(user);
 
-        assignRoleToUser(savedUser, currentRole, currentTenant);
+        userRoleService.assignRoleToUser(savedUser, currentRole, currentTenant);
 
-        return true;
-    }
+        auditLogService.log(new AuditLogRequest(actor.userId(),actor.tenantId(),AuditAction.USER_CREATE,
+                "USER",savedUser.getuId(),targetTenantId,
+                AuditDecision.ALLOW,"User created successfully"));
 
-    @PreAuthorize("hasAuthority('ROLE_ASSIGN')")
-    @Transactional
-    public UserRoleEntity addRoleToExistingUser(AssignRoleRequest request) {
-
-        UserEntity user = userRepo.findById(request.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.userId()));
-
-
-        /**
-         * ------------cross tenant action check-----------
-         **/
-        if (user.getTenant() == null) {
-            tenantAuthorizationService.verifyCanAccessPlatform();
-        } else {
-            tenantAuthorizationService.verifyCanAccessTenant(user.getTenant().getTenantId());
-        }
-
-        RolesEntity role = rolesRepo.findById(request.roleId())
-                .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + request.roleId()));
-
-        TenantEntity tenant = user.getTenant();
-
-        return assignRoleToUser(user, role, tenant);
-    }
-
-
-    @PreAuthorize("hasAuthority('ROLE_ASSIGN')")
-    private UserRoleEntity assignRoleToUser(UserEntity user, RolesEntity role, TenantEntity assignmentTenant) {
-
-        validateUserRoleAssignment(user, role, assignmentTenant);
-
-        boolean alreadyAssigned = userRoleRepo.existsByUserAndRoleAndTenant(user, role, assignmentTenant);
-        if (alreadyAssigned) {
-            throw new IllegalArgumentException("This role is already assigned to the user");
-        }
-
-        UserRoleEntity userRole = new UserRoleEntity();
-        userRole.setUser(user);
-        userRole.setRole(role);
-        userRole.setTenant(assignmentTenant);
-
-        return userRoleRepo.save(userRole);
-    }
-
-    //fuction for userLogin for any organization
-   /* public boolean login(RegisterUserRequest loginUser){
-        // for given pw and email cross check whether
-        return false;
-    }*/
-
-    /**
-     * Whether this role with this scope is valid for user with tenant.
-     * **/
-    private void validateUserRoleAssignment(UserEntity user, RolesEntity role, TenantEntity assignmentTenant) {
-
-        if (role.getScopeType() == ScopeType.PLATFORM) {
-            if (assignmentTenant!=  null) {
-                throw new IllegalArgumentException("Platform role cannot have tenant");
-            }
-            if (user.getTenant() != null) {
-                throw new IllegalArgumentException("Platform user cannot have tenant");
-            }
-            return;
-        }
-
-        if (role.getScopeType() == ScopeType.TENANT) {
-            if (assignmentTenant == null) {
-                throw new IllegalArgumentException("Tenant role requires tenant");
-            }
-            if (user.getTenant() == null) {
-                throw new IllegalArgumentException("Tenant user must belong to a tenant");
-            }
-            if (!user.getTenant().getTenantId().equals(assignmentTenant.getTenantId())) {
-                throw new IllegalArgumentException("User tenant mismatch");
-            }
-            if (role.getTenant() == null || !role.getTenant().getTenantId().equals(assignmentTenant.getTenantId())) {
-                throw new IllegalArgumentException("Role tenant mismatch");
-            }
-        }
+        return savedUser;
     }
 
     @PreAuthorize("hasAuthority('USER_DELETE')")
     @Transactional
-    public boolean deleteUser(DeleteUserRequest deleteUserRequest) {
+    public UserEntity deleteUser(DeleteUserRequest deleteUserRequest) {
 
         UserEntity targetUser = userRepo.findById(deleteUserRequest.userId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "User not found with id: " + deleteUserRequest.userId()
                 ));
-        /**
-         * ------------cross tenant action check-----------
-         **/
 
-        if (targetUser.getTenant() == null) {
-            tenantAuthorizationService.verifyCanAccessPlatform();
-        } else {
-            tenantAuthorizationService.verifyCanAccessTenant(
-                    targetUser.getTenant().getTenantId()
-            );
+        Integer targetUserId = targetUser.getuId();
+
+        Integer targetTenantId = (targetUser.getTenant() == null) ? null : targetUser.getTenant().getTenantId();
+
+        CurrentUserService.CurrentActor actor = currentUserService.getCurrentActor();
+
+        try {
+            if (targetUser.getTenant() == null) {
+                tenantAuthorizationService.verifyCanAccessPlatform();
+            } else {
+                tenantAuthorizationService.verifyCanAccessTenant(targetTenantId);
+            }
+        } catch (AccessDeniedException exception) {
+
+            auditLogService.logDenied(new AuditLogRequest(actor.userId(),actor.tenantId(),
+                    AuditAction.USER_DELETE,"USER",targetUserId,
+                    targetTenantId, AuditDecision.DENY,exception.getMessage()));
+
+            throw exception;
         }
 
         userRepo.delete(targetUser);
-        return true;
+
+        auditLogService.log(new AuditLogRequest(actor.userId(),actor.tenantId(),
+                AuditAction.USER_DELETE,"USER",targetUserId,
+                targetTenantId, AuditDecision.ALLOW,"User deleted successfully"
+        ));
+
+        return targetUser;
     }
 
     @PreAuthorize("hasAuthority('ROLE_CREATE')")
@@ -205,31 +155,44 @@ public class UserService {
         } else if (newRole.scope() == ScopeType.PLATFORM) {
             tenantAuthorizationService.verifyCanAccessPlatform();
             currRole.setTenant(null);
+
         } else {
             throw new IllegalArgumentException("Invalid role scope");
         }
+
         return rolesRepo.save(currRole);
     }
-
 
     @PreAuthorize("hasAuthority('ROLE_PERMISSION_SET')")
     @Transactional
     public List<RolePermissionEntity> setNewPermissionsToRole(SetPermissionRequest request) {
 
-        RolesEntity role = rolesRepo.findById(request.roleId()).orElseThrow(() ->
-                new ResourceNotFoundException("Role not found with id: " + request.roleId()));
+        RolesEntity role = rolesRepo.findById(request.roleId())
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + request.roleId()));
 
+        Integer targetRoleId = role.getRoleId();
+        Integer targetTenantId = (role.getTenant() == null) ? null : role.getTenant().getTenantId();
 
-        if (role.getScopeType() == ScopeType.PLATFORM) {
-            tenantAuthorizationService.verifyCanAccessPlatform();
-        } else {
-            tenantAuthorizationService.verifyCanAccessTenant(
-                    role.getTenant().getTenantId()
-            );
+        CurrentUserService.CurrentActor actor = currentUserService.getCurrentActor();
+
+        try {
+            if (role.getScopeType() == ScopeType.PLATFORM) {
+                tenantAuthorizationService.verifyCanAccessPlatform();
+            } else {
+                tenantAuthorizationService.verifyCanAccessTenant(targetTenantId);
+            }
+        } catch (AccessDeniedException exception) {
+            auditLogService.logDenied(new AuditLogRequest(actor.userId(), actor.tenantId(),
+                    AuditAction.ROLE_PERMISSION_ASSIGN,"ROLE",
+                    targetRoleId, targetTenantId, AuditDecision.DENY, exception.getMessage()));
+
+            throw exception;
         }
+
         Set<String> requestedNames = request.permissionSet();
 
-        List<PermissionEntity> foundPermissions = permissionRepo.findByPermissionNameIn(requestedNames);
+        List<PermissionEntity> foundPermissions =
+                permissionRepo.findByPermissionNameIn(requestedNames);
 
         Set<String> foundNames = foundPermissions.stream()
                 .map(PermissionEntity::getPermissionName)
@@ -240,13 +203,14 @@ public class UserService {
                 .collect(Collectors.toSet());
 
         if (!missingNames.isEmpty()) {
-            throw new ResourceNotFoundException("Permissions not found: " + missingNames);
+            throw new ResourceNotFoundException(
+                    "Permissions not found: " + missingNames
+            );
         }
 
-        // reject permissions that cannot legally attach to this role's scope
-        // BEFORE checking already-assigned, so a bad request fails atomically
         for (PermissionEntity permission : foundPermissions) {
-            PermissionApplicability applicability = permission.getApplicability();
+            PermissionApplicability applicability =
+                    permission.getApplicability();
 
             if (applicability == PermissionApplicability.PLATFORM_ONLY
                     && role.getScopeType() != ScopeType.PLATFORM) {
@@ -266,14 +230,18 @@ public class UserService {
         }
 
         Set<String> alreadyAssignedNames = role.getRolePermission().stream()
-                .map(rolePermission -> rolePermission.getPermission().getPermissionName())
+                .map(rolePermission ->
+                        rolePermission.getPermission().getPermissionName()
+                )
                 .collect(Collectors.toSet());
 
         List<RolePermissionEntity> newAssignments = new ArrayList<>();
 
         for (PermissionEntity permission : foundPermissions) {
             if (!alreadyAssignedNames.contains(permission.getPermissionName())) {
-                RolePermissionEntity rolePermission = new RolePermissionEntity();
+                RolePermissionEntity rolePermission =
+                        new RolePermissionEntity();
+
                 rolePermission.setRole(role);
                 rolePermission.setPermission(permission);
 
@@ -283,7 +251,19 @@ public class UserService {
         }
 
         rolesRepo.save(role);
+
+        for (RolePermissionEntity assignment : newAssignments) {
+            PermissionEntity permission = assignment.getPermission();
+
+            auditLogService.log(new AuditLogRequest(actor.userId(), actor.tenantId(),
+                    AuditAction.ROLE_PERMISSION_ASSIGN, "ROLE",
+                    targetRoleId, targetTenantId, AuditDecision.ALLOW,
+                    "Permission assigned successfully: permissionId="
+                            + permission.getPermissionId() + ", permissionName="
+                            + permission.getPermissionName()
+            ));
+        }
+
         return newAssignments;
     }
-
 }

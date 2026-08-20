@@ -13,9 +13,7 @@ import org.springframework.stereotype.Service;
 public class TenantAuthorizationService {
 
     public void verifyCanAccessTenant(Integer targetTenantId) {
-        System.out.println("-----------------checking for cross tenant actions--------------");
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new AccessDeniedException("Authentication is required");
@@ -37,7 +35,6 @@ public class TenantAuthorizationService {
                     "Cross-tenant operation is not allowed"
             );
         }
-        System.out.println("---------No cross tenant action----------------");
     }
 
     public void verifyCanAccessPlatform() {

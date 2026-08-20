@@ -39,3 +39,8 @@ out/
 ### For local use only #####
 auth_engine/src/main/resources/credentials.txt
 auth_engine/.gitignore
+
+# For adding the jar
+#!auth_engine/build/
+#!auth_engine/build/libs/
+#!auth_engine/build/libs/auth_engine-0.0.1-SNAPSHOT.jar
