@@ -101,10 +101,10 @@ public class UserRoleService {
 
         if (role.getScopeType() == ScopeType.PLATFORM) {
             if (assignmentTenant != null) {
-                throw new IllegalArgumentException("Platform role cannot have tenant");
+                throw new IllegalArgumentException("Assigning Platform role to a tenant is not allowed");
             }
             if (user.getTenant() != null) {
-                throw new IllegalArgumentException("Platform user cannot have tenant");
+                throw new IllegalArgumentException("Assigning a Platform role to a tenant user is not allowed");
             }
             return;
         }
