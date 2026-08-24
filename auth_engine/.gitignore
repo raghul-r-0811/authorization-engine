@@ -37,10 +37,21 @@ out/
 .vscode/
 
 ### For local use only #####
-auth_engine/src/main/resources/credentials.txt
-auth_engine/.gitignore
+# auth_engine/src/main/resources/credentials.txt
+# Changed because this .gitignore is inside auth_engine; paths here are relative to auth_engine.
+src/main/resources/credentials.txt
 
-# For adding the jar
-#!auth_engine/build/
-#!auth_engine/build/libs/
-#!auth_engine/build/libs/auth_engine-0.0.1-SNAPSHOT.jar
+# auth_engine/.gitignore
+# Removed because this is the .gitignore file itself and it must be tracked in Git.
+
+# Added so your local Docker/Neon/JWT environment file is never committed.
+.env
+
+# For adding the JAR
+# Added because build/ above ignores the entire build directory; Git must be allowed to enter these parent folders first.
+!build/
+!build/libs/
+
+# Changed from !auth_engine/build/libs/auth_engine-0.0.1-SNAPSHOT.jar
+# because this .gitignore is inside auth_engine, so the JAR path starts at build/.
+!build/libs/auth_engine-0.0.1-SNAPSHOT.jar
