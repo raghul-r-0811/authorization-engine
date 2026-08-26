@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-08-26T06:08:50.200Z" hostname="Raghul" time="0.048">
+  <properties/>
+  <testcase name="verifyCanAccessPlatform_whenSuperAdminAccessesPlatform_doesNotThrowException()" classname="org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest" time="0.02"/>
+  <testcase name="verifyCanAccessTenant_whenNonSuperAdminHasNoTenantInDetails_throwsAccessDeniedException()" classname="org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest" time="0.002"/>
+  <testcase name="verifyCanAccessTenant_whenTenantUserAccessesOwnTenant_doesNotThrowException()" classname="org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest" time="0.001"/>
+  <testcase name="verifyCanAccessTenant_whenTenantUserAccessesAnotherTenant_throwsAccessDeniedException()" classname="org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest" time="0.002"/>
+  <testcase name="verifyCanAccessPlatform_whenAuthenticationIsNotAuthenticated_throwsAccessDeniedException()" classname="org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest" time="0.003"/>
+  <testcase name="verifyCanAccessTenant_whenAuthenticationIsMissing_throwsAccessDeniedException()" classname="org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest" time="0.002"/>
+  <testcase name="verifyCanAccessTenant_whenAuthenticationIsNotAuthenticated_throwsAccessDeniedException()" classname="org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest" time="0.002"/>
+  <testcase name="verifyCanAccessPlatform_whenTenantUserAccessesPlatform_throwsAccessDeniedException()" classname="org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest" time="0.002"/>
+  <testcase name="verifyCanAccessTenant_whenSuperAdminAccessesAnyTenant_doesNotThrowException()" classname="org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest" time="0.002"/>
+  <testcase name="verifyCanAccessPlatform_whenAuthenticationIsMissing_throwsAccessDeniedException()" classname="org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest" time="0.001"/>
+  <testcase name="verifyCanAccessPlatform_whenAuthenticatedUserHasNoAuthorities_throwsAccessDeniedException()" classname="org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

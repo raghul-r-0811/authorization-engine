@@ -20,13 +20,13 @@
 <tr>
 <td>
 <div class="infoBox" id="tests">
-<div class="counter">13</div>
+<div class="counter">60</div>
 <p>tests</p>
 </div>
 </td>
 <td>
 <div class="infoBox" id="failures">
-<div class="counter">0</div>
+<div class="counter">5</div>
 <p>failures</p>
 </div>
 </td>
@@ -38,7 +38,7 @@
 </td>
 <td>
 <div class="infoBox" id="duration">
-<div class="counter">2.031s</div>
+<div class="counter">15.680s</div>
 <p>duration</p>
 </div>
 </td>
@@ -47,8 +47,8 @@
 </div>
 </td>
 <td>
-<div class="infoBox success" id="successRate">
-<div class="percent">100%</div>
+<div class="infoBox failures" id="successRate">
+<div class="percent">91%</div>
 <p>successful</p>
 </div>
 </td>
@@ -58,12 +58,40 @@
 <div class="tab-container">
 <ul class="tabLinks">
 <li>
+<a href="#">Failed tests</a>
+</li>
+<li>
 <a href="#">Packages</a>
 </li>
 <li>
 <a href="#">Classes</a>
 </li>
 </ul>
+<div class="tab">
+<h2>Failed tests</h2>
+<ul class="linkList">
+<li>
+<a href="classes/org.raghul.auth_engine.service.SuperAdminServiceTest.html">SuperAdminServiceTest</a>.
+<a href="classes/org.raghul.auth_engine.service.SuperAdminServiceTest.html#addTenant_shouldAllowSuperAdmin()">addTenant_shouldAllowSuperAdmin()</a>
+</li>
+<li>
+<a href="classes/org.raghul.auth_engine.service.SuperAdminServiceTest.html">SuperAdminServiceTest</a>.
+<a href="classes/org.raghul.auth_engine.service.SuperAdminServiceTest.html#addTenant_shouldDenyAnonymousUser()">addTenant_shouldDenyAnonymousUser()</a>
+</li>
+<li>
+<a href="classes/org.raghul.auth_engine.service.SuperAdminServiceTest.html">SuperAdminServiceTest</a>.
+<a href="classes/org.raghul.auth_engine.service.SuperAdminServiceTest.html#addTenant_shouldDenyTenantAdmin()">addTenant_shouldDenyTenantAdmin()</a>
+</li>
+<li>
+<a href="classes/org.raghul.auth_engine.service.SuperAdminServiceTest.html">SuperAdminServiceTest</a>.
+<a href="classes/org.raghul.auth_engine.service.SuperAdminServiceTest.html#addTenant_shouldDenyUser()">addTenant_shouldDenyUser()</a>
+</li>
+<li>
+<a href="classes/org.raghul.auth_engine.service.SuperAdminServiceTest.html">SuperAdminServiceTest</a>.
+<a href="classes/org.raghul.auth_engine.service.SuperAdminServiceTest.html#someTest()">someTest()</a>
+</li>
+</ul>
+</div>
 <div class="tab">
 <h2>Packages</h2>
 <table>
@@ -80,12 +108,32 @@
 <tbody>
 <tr>
 <td class="success">
+<a href="packages/org.raghul.auth_engine.html">org.raghul.auth_engine</a>
+</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.098s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="failures">
 <a href="packages/org.raghul.auth_engine.service.html">org.raghul.auth_engine.service</a>
 </td>
-<td>13</td>
+<td>5</td>
+<td>5</td>
+<td>0</td>
+<td>0.041s</td>
+<td class="failures">0%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="packages/org.raghul.auth_engine.service.unitTest.html">org.raghul.auth_engine.service.unitTest</a>
+</td>
+<td>54</td>
 <td>0</td>
 <td>0</td>
-<td>2.031s</td>
+<td>15.541s</td>
 <td class="success">100%</td>
 </tr>
 </tbody>
@@ -107,12 +155,82 @@
 <tbody>
 <tr>
 <td class="success">
-<a href="classes/org.raghul.auth_engine.service.UserRoleServiceTest.html">org.raghul.auth_engine.service.UserRoleServiceTest</a>
+<a href="classes/org.raghul.auth_engine.AuthEngineApplicationTests.html">org.raghul.auth_engine.AuthEngineApplicationTests</a>
+</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.098s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="failures">
+<a href="classes/org.raghul.auth_engine.service.SuperAdminServiceTest.html">org.raghul.auth_engine.service.SuperAdminServiceTest</a>
+</td>
+<td>5</td>
+<td>5</td>
+<td>0</td>
+<td>0.041s</td>
+<td class="failures">0%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="classes/org.raghul.auth_engine.service.unitTest.AuditLogServiceTest.html">org.raghul.auth_engine.service.unitTest.AuditLogServiceTest</a>
+</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>13.050s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="classes/org.raghul.auth_engine.service.unitTest.CurrentUserServiceTest.html">org.raghul.auth_engine.service.unitTest.CurrentUserServiceTest</a>
+</td>
+<td>4</td>
+<td>0</td>
+<td>0</td>
+<td>0.283s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="classes/org.raghul.auth_engine.service.unitTest.RoleServiceTest.html">org.raghul.auth_engine.service.unitTest.RoleServiceTest</a>
 </td>
 <td>13</td>
 <td>0</td>
 <td>0</td>
-<td>2.031s</td>
+<td>0.693s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="classes/org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest.html">org.raghul.auth_engine.service.unitTest.TenantAuthorizationServiceTest</a>
+</td>
+<td>11</td>
+<td>0</td>
+<td>0</td>
+<td>0.039s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="classes/org.raghul.auth_engine.service.unitTest.UserRoleServiceTest.html">org.raghul.auth_engine.service.unitTest.UserRoleServiceTest</a>
+</td>
+<td>13</td>
+<td>0</td>
+<td>0</td>
+<td>1.225s</td>
+<td class="success">100%</td>
+</tr>
+<tr>
+<td class="success">
+<a href="classes/org.raghul.auth_engine.service.unitTest.UserServiceTest.html">org.raghul.auth_engine.service.unitTest.UserServiceTest</a>
+</td>
+<td>11</td>
+<td>0</td>
+<td>0</td>
+<td>0.251s</td>
 <td class="success">100%</td>
 </tr>
 </tbody>
@@ -126,7 +244,7 @@
 <input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
 </label>
 </div>Generated by 
-<a href="https://www.gradle.org">Gradle 9.2.1</a> at 24-Aug-2026, 4:54:43 pm</p>
+<a href="https://www.gradle.org">Gradle 9.2.1</a> at Aug 26, 2026, 6:08:52 AM</p>
 </div>
 </div>
 </body>

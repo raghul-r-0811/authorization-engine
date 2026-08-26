@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.raghul.auth_engine.service.unitTest.RoleServiceTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-08-26T06:08:49.391Z" hostname="Raghul" time="0.779">
+  <properties/>
+  <testcase name="setNewPermissionsToRole_whenPlatformRoleAndPermissionAreValid_assignsPermissionUsingPlatformAuthorization()" classname="org.raghul.auth_engine.service.unitTest.RoleServiceTest" time="0.489"/>
+  <testcase name="setNewPermissionsToRole_whenRoleDoesNotExist_throwsResourceNotFoundException()" classname="org.raghul.auth_engine.service.unitTest.RoleServiceTest" time="0.03"/>
+  <testcase name="setNewPermissionsToRole_whenTenantOnlyPermissionIsAssignedToPlatformRole_throwsIllegalArgumentException()" classname="org.raghul.auth_engine.service.unitTest.RoleServiceTest" time="0.01"/>
+  <testcase name="setNewPermissionsToRole_whenPermissionAlreadyAssigned_doesNotCreateDuplicateAssignmentOrAudit()" classname="org.raghul.auth_engine.service.unitTest.RoleServiceTest" time="0.022"/>
+  <testcase name="createNewRole_whenTenantScopeAndAuthorized_savesTenantRole()" classname="org.raghul.auth_engine.service.unitTest.RoleServiceTest" time="0.024"/>
+  <testcase name="createNewRole_whenScopeIsNull_throwsIllegalArgumentExceptionAndDoesNotSaveRole()" classname="org.raghul.auth_engine.service.unitTest.RoleServiceTest" time="0.009"/>
+  <testcase name="createNewRole_whenPlatformScopeAndAuthorized_savesPlatformRoleWithoutTenant()" classname="org.raghul.auth_engine.service.unitTest.RoleServiceTest" time="0.016"/>
+  <testcase name="setNewPermissionsToRole_whenTenantRoleAndPermissionsAreValid_assignsPermissionsAndCreatesAllowAudits()" classname="org.raghul.auth_engine.service.unitTest.RoleServiceTest" time="0.009"/>
+  <testcase name="setNewPermissionsToRole_whenRequestedPermissionIsMissing_throwsResourceNotFoundAndDoesNotSaveRole()" classname="org.raghul.auth_engine.service.unitTest.RoleServiceTest" time="0.009"/>
+  <testcase name="createNewRole_whenTenantDoesNotExist_throwsResourceNotFoundAndDoesNotSaveRole()" classname="org.raghul.auth_engine.service.unitTest.RoleServiceTest" time="0.005"/>
+  <testcase name="setNewPermissionsToRole_whenPlatformOnlyPermissionIsAssignedToTenantRole_throwsIllegalArgumentException()" classname="org.raghul.auth_engine.service.unitTest.RoleServiceTest" time="0.009"/>
+  <testcase name="createNewRole_whenTenantScopeHasNullTenantId_throwsIllegalArgumentException()" classname="org.raghul.auth_engine.service.unitTest.RoleServiceTest" time="0.007"/>
+  <testcase name="setNewPermissionsToRole_whenTenantAuthorizationDenies_logsDenyAuditAndDoesNotAssignPermissions()" classname="org.raghul.auth_engine.service.unitTest.RoleServiceTest" time="0.054"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

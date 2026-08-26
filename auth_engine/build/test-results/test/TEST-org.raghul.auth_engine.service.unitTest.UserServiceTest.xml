@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.raghul.auth_engine.service.unitTest.UserServiceTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-08-26T06:08:51.513Z" hostname="Raghul" time="0.264">
+  <properties/>
+  <testcase name="registerUser_whenValidTenantUserRequest_savesUserAssignsInitialRoleAndCreatesAllowAudit()" classname="org.raghul.auth_engine.service.unitTest.UserServiceTest" time="0.179"/>
+  <testcase name="deleteUser_whenTargetUserIsPlatformUserAndActorHasPlatformAccess_deletesUserAndCreatesAllowAudit()" classname="org.raghul.auth_engine.service.unitTest.UserServiceTest" time="0.009"/>
+  <testcase name="registerUser_whenInitialRoleAssignmentFails_propagatesExceptionAndDoesNotCreateUserAllowAudit()" classname="org.raghul.auth_engine.service.unitTest.UserServiceTest" time="0.007"/>
+  <testcase name="registerUser_whenTenantDoesNotExist_throwsResourceNotFoundAndDoesNotSaveUser()" classname="org.raghul.auth_engine.service.unitTest.UserServiceTest" time="0.006"/>
+  <testcase name="deleteUser_whenActorCannotAccessPlatform_logsDenyAndDoesNotDeleteUser()" classname="org.raghul.auth_engine.service.unitTest.UserServiceTest" time="0.007"/>
+  <testcase name="registerUser_whenRoleDoesNotExist_throwsResourceNotFoundAndDoesNotSaveUser()" classname="org.raghul.auth_engine.service.unitTest.UserServiceTest" time="0.007"/>
+  <testcase name="deleteUser_whenUserDoesNotExist_throwsResourceNotFoundAndDoesNotDelete()" classname="org.raghul.auth_engine.service.unitTest.UserServiceTest" time="0.005"/>
+  <testcase name="deleteUser_whenTargetUserBelongsToAuthorizedTenant_deletesUserAndCreatesAllowAudit()" classname="org.raghul.auth_engine.service.unitTest.UserServiceTest" time="0.006"/>
+  <testcase name="registerUser_whenEmailAlreadyExistsInSameTenant_throwsAndDoesNotSaveUser()" classname="org.raghul.auth_engine.service.unitTest.UserServiceTest" time="0.009"/>
+  <testcase name="registerUser_whenActorCannotAccessTargetTenant_logsDenyAndThrowsWithoutSavingUser()" classname="org.raghul.auth_engine.service.unitTest.UserServiceTest" time="0.009"/>
+  <testcase name="deleteUser_whenActorCannotAccessTargetTenant_logsDenyAndDoesNotDeleteUser()" classname="org.raghul.auth_engine.service.unitTest.UserServiceTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
