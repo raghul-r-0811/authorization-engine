@@ -3,8 +3,6 @@ HELP.md
 
 # Ignore Gradle output except the deployable Railway JAR
 build/*
-!build/libs/
-!build/libs/auth_engine-0.0.1-SNAPSHOT.jar
 
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
