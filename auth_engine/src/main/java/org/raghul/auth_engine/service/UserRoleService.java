@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserRoleService {
 
-    private final TenantAuthorizationService tenantAuthorizationService;
+    private final TenantAccessPolicy tenantAccessPolicy;
     private final UserRoleRepo userRoleRepo;
     private final UserRepo userRepo;
     private final RolesRepo rolesRepo;
@@ -44,9 +44,9 @@ public class UserRoleService {
 
         try {
             if (user.getTenant() == null) {
-                tenantAuthorizationService.verifyCanAccessPlatform();
+                tenantAccessPolicy.verifyCanAccessPlatform();
             } else {
-                tenantAuthorizationService.verifyCanAccessTenant(targetTenantId);
+                tenantAccessPolicy.verifyCanAccessTenant(targetTenantId);
             }
         } catch (AccessDeniedException exception) {
             auditLogService.logDenied(new AuditLogRequest(actor.userId(),
@@ -123,6 +123,4 @@ public class UserRoleService {
             }
         }
     }
-
-
 }

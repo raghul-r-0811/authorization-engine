@@ -7,6 +7,7 @@ import org.raghul.auth_engine.entity.RolePermissionEntity;
 import org.raghul.auth_engine.entity.RolesEntity;
 import org.raghul.auth_engine.entity.UserEntity;
 import org.raghul.auth_engine.entity.UserRoleEntity;
+import org.raghul.auth_engine.service.RoleService;
 import org.raghul.auth_engine.service.UserRoleService;
 import org.raghul.auth_engine.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ public class UserController {
 
     private final UserService userService;
     private final UserRoleService userRoleService;
+    private final RoleService roleService;
 
 
     @PostMapping("/deleteUser")
@@ -44,13 +46,13 @@ public class UserController {
 
     @PostMapping("/createRole")
     public ResponseEntity<ApiResponse> addTenantAdminRole(@RequestBody RegisterRoleRequest newRole){
-        RolesEntity savedRole = userService.createNewRole(newRole);
+        RolesEntity savedRole = roleService.createNewRole(newRole);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("Role created successfully", savedRole));
     }
 
     @PostMapping("setPermission")
     public ResponseEntity<ApiResponse> setPermissionToRole(@RequestBody SetPermissionRequest setPermissionRequest){
-        List<RolePermissionEntity> saved = userService.setNewPermissionsToRole(setPermissionRequest);
+        List<RolePermissionEntity> saved = roleService.setNewPermissionsToRole(setPermissionRequest);
 
         List<RolePermissionResponse> response = saved.stream()
                 .map(rp -> new RolePermissionResponse(
