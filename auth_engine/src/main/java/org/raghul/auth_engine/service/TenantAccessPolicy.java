@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
  * This class will be used to set boundaries to pervent for cross tenent actions
  * **/
 @Service
-public class TenantAuthorizationService {
+public class TenantAccessPolicy {
 
     public void verifyCanAccessTenant(Integer targetTenantId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -37,6 +37,8 @@ public class TenantAuthorizationService {
         }
     }
 
+
+    // When one platform user try to act on another platform user
     public void verifyCanAccessPlatform() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
